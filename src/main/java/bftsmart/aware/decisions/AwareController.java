@@ -258,9 +258,12 @@ public class AwareController {
         if (svc.getStaticConf().isUseDynamicWeights()
                 && cid % svc.getStaticConf().getCalculationInterval() == 0 & cid > 0) {
             // threshold-AWARE: check the next faster view if there is one
-           View v = (svc.getStaticConf().isAutoSwitching() && svc.getCurrentView().isFastestConfig())
+           View v = (svc.getStaticConf().isAutoSwitching())
                    ? svc.nextFasterConfig()
                    : svc.getCurrentView();
+
+
+           logger.info("Optimize system for next view " + v);
 
             // start new Thread to compute the best AWARE config in the background
             Thread computationOfBestConfig = new Thread() {

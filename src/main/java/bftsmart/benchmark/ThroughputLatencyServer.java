@@ -4,6 +4,7 @@ import bftsmart.tests.recovery.Operation;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.defaultservices.DefaultSingleRecoverable;
+import bftsmart.tom.util.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,8 @@ public class ThroughputLatencyServer extends DefaultSingleRecoverable {
 	private final Set<Integer> senders;
 	private double maxThroughput;
 
+	private Storage consensusLatency = null;
+
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println("USAGE: bftsmart.benchmark.ThroughputLatencyServer <process id>");
@@ -33,6 +36,7 @@ public class ThroughputLatencyServer extends DefaultSingleRecoverable {
 
 	public ThroughputLatencyServer(int processId) {
 		senders = new HashSet<>(1000);
+		consensusLatency = new Storage(1000);
 		new ServiceReplica(processId, this, this);
 	}
 
@@ -42,6 +46,12 @@ public class ThroughputLatencyServer extends DefaultSingleRecoverable {
 		senders.add(msgCtx.getSender());
 		ByteBuffer buffer = ByteBuffer.wrap(command);
 		Operation op = Operation.getOperation(buffer.get());
+
+
+		if (msgCtx != null && msgCtx.getFirstInBatch() != null) {
+			consensusLatency.store(msgCtx.getFirstInBatch().decisionTime - msgCtx.getFirstInBatch().consensusStartTime);
+		}
+
 		byte[] response = null;
 		switch (op) {
 			case PUT:
@@ -82,6 +92,7 @@ public class ThroughputLatencyServer extends DefaultSingleRecoverable {
 				maxThroughput = throughput;
 			logger.info("M:(clients[#]|requests[#]|delta[ns]|throughput[ops/s], max[ops/s])>({}|{}|{}|{}|{})",
 					senders.size(), numRequests, delta, throughput, maxThroughput);
+			logger.info("Consensus latency: " + ( consensusLatency.getAverage(false) / 1000 ) + " us");
 			numRequests = 0;
 			startTime = currentTime;
 			senders.clear();
