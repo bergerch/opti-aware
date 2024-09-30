@@ -257,7 +257,7 @@ public class AwareController {
         // Calculate a good configuration for a future reconfiguration
         if (svc.getStaticConf().isUseDynamicWeights()
                 && cid % svc.getStaticConf().getCalculationInterval() == 0 & cid > 0) {
-            // threshold-AWARE: check the next faster view if there is one
+            // Mercury: check the next faster view if there is one
            View v = (svc.getStaticConf().isAutoSwitching())
                    ? svc.nextFasterConfig()
                    : svc.getCurrentView();
@@ -299,7 +299,7 @@ public class AwareController {
              * completed
              */
 
-            // Threshold-AWARE: Currently: Periodically try to improve the threshold
+            // Mercury: Currently: Periodically try to improve the threshold
             boolean thresholdDecrease = false;
             if (svc.getStaticConf().isAutoSwitching()) {
                 if (svc.getCurrentView().isFastestConfig()) {

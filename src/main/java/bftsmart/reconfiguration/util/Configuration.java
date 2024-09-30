@@ -129,7 +129,7 @@ public class Configuration {
 				hashAlgorithm = s;
 			}
 
-			s = (String) configs.remove("system.taware.autoswitching");
+			s = (String) configs.remove("system.mercury.autoswitching");
 			if (s == null) {
 				this.autoSwitching = false;
 			} else {

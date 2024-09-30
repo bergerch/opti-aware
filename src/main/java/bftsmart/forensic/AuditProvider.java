@@ -100,7 +100,7 @@ public class AuditProvider {
                     int reps = audit_reps.containsKey(i) ? audit_reps.get(i) : 0;
                     audit_reps.put(i, reps + 1);
 
-                    if (audit_reps.get(i) >= 2 * controller.getCurrentView().getT() + 1) { // used for TAWARE // It is  possible to get a null pointer exception here if the map is deleted by other thread
+                    if (audit_reps.get(i) >= 2 * controller.getCurrentView().getT() + 1) { // used for Mercury // It is  possible to get a null pointer exception here if the map is deleted by other thread
                         if (audit_reps.get(i) >= 2 * controller.getCurrentView().getF() + 1) {
                             last_audit = i; // this is the last cid that for certain is safe
                         }

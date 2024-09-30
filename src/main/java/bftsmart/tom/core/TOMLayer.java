@@ -480,7 +480,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
 
             if (!doWork) break;
 
-            //START t-AWARE:  block untils t-AWARE reconfiguration completes
+            //START Mercury:  block untils Mercury reconfiguration completes
             reconfigurationLock.lock();
             if ((getLastExec() % controller.getStaticConf().getCalculationInterval()) == controller.getStaticConf().getCalculationDelay()
                     && getLastExec() >= controller.getStaticConf().getCalculationInterval() + controller.getStaticConf().getCalculationDelay()
@@ -493,7 +493,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
             if (execManager.getCurrentLeader() != this.controller.getStaticConf().getProcessId()) {
                 continue;
             }
-            //END t-AWARE:  block untils t-AWARE reconfiguration completes
+            //END Mercury:  block untils Mercury reconfiguration completes
 
             logger.debug("I'm the leader.");
 

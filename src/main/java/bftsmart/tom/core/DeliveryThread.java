@@ -302,7 +302,7 @@ public final class DeliveryThread extends Thread {
 						count++;
 
 						/**
-						 *  t-AWARE
+						 *  Mercury
 						 */
 						Monitor.getInstance(controller).handleMonitoringMessages(d);
 						// Audit should only happen here if storage is to big

@@ -97,7 +97,7 @@ public class TOMConfiguration extends Configuration {
     private int synchronisationPeriod;
     private int synchronisationDelay;
 
-    // T-AWARE
+    // Mercury
     private boolean useforensics;
     private int min_storage_size;
     private int granularity;
@@ -511,30 +511,30 @@ public class TOMConfiguration extends Configuration {
                 clientInvokeOrderedTimeout = Integer.parseInt(s);
             }
 
-            /** T-AWARE **/
+            /** Mercury **/
 
-            s = (String) configs.remove("system.taware.useforensics");
+            s = (String) configs.remove("system.mercury.useforensics");
             useforensics = s == null ? false : Boolean.parseBoolean(s);
 
-            s = (String) configs.remove("system.taware.storagesize");
+            s = (String) configs.remove("system.mercury.storagesize");
             min_storage_size = s == null ? 1000 : Integer.parseInt(s);
 
-            s = (String) configs.remove("system.taware.granularity");
+            s = (String) configs.remove("system.mercury.granularity");
             granularity = s == null ? 1 : Integer.parseInt(s);
 
-            s = (String) configs.remove("system.taware.backupforensics");
+            s = (String) configs.remove("system.mercury.backupforensics");
             backupforensics = s == null ? true : Boolean.parseBoolean(s);
 
-            s = (String) configs.remove("system.taware.fastforensics");
+            s = (String) configs.remove("system.mercury.fastforensics");
             fastforensics = s == null ? true : Boolean.parseBoolean(s);
 
-            s = (String) configs.remove("system.taware.forensicsinterval");
+            s = (String) configs.remove("system.mercury.forensicsinterval");
             forensicsInterval = s == null ? 1000 : Integer.parseInt(s);
 
-            s = (String) configs.remove("system.taware.leaderaudit");
+            s = (String) configs.remove("system.mercury.leaderaudit");
             leaderAudit = s == null ? true : Boolean.parseBoolean(s);
 
-            s = (String) configs.remove("system.taware.auditthreads");
+            s = (String) configs.remove("system.mercury.auditthreads");
             auditthreads = s == null ? 1 : Integer.parseInt(s);
 
         } catch (Exception e) {
@@ -831,7 +831,7 @@ public class TOMConfiguration extends Configuration {
         this.synchronisationDelay = synchronisationDelay;
     }
 
-    // T-AWARE
+    // Mercury
     public boolean useForensics() {
         return useforensics;
     }

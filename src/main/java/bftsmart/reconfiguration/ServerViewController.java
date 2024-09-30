@@ -59,7 +59,7 @@ public class ServerViewController extends ViewController {
     private int last_checkpoint;
 
     /**
-     * T-AWARE
+     * Mercury
      */
     private AuditProvider auditProvider;
     private int K = -1; // granularity
