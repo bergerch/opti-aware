@@ -18,18 +18,17 @@ A **technical description** of Mercury can be found in the **MIDDLEWARE'24** pap
 Fast Wide-Area Byzantine Replication with Mercury](https://arxiv.org/abs/2305.15000)
 
 
-This branch contains the sources of Mercury, which integrates BFT forensic support and can sswitch between two modes of execution. It also incorporates Byzantine Correctables to allow for client-side speculation.
+This branch contains the sources of Mercury, which integrates BFT forensic support and can switch between two modes of execution. It also incorporates Byzantine Correctables to allow for client-side speculation.
 
 
 
 *Important:
-For evaluation purpose, we suggest to deploy Mecury in a wide-area network (WAN).*
+For evaluation purpose, we suggest to deploy Mercury in a wide-area network (WAN).*
 In the following, we provide a description of how to (1) build, (2) configure, and (3) run this software.
 
 
 ----------
 
-This branch contains the source code for WHEAT, an extension of BFT-SMART (based on version 1.1-beta) that implements the optimizations and vote assignment schemes described in [1]. It can be lanuched in the same way as the standard library.
 
 ## Step 1: Check for Updates
 
@@ -50,7 +49,7 @@ git remote add mercury https://github.com/bergerch/Mercury
 git pull mercury main
 ```
 
-Now you should have the the most recent changes. Next step is to build the software.
+Now you should have the most recent changes. Next step is to build the software.
 
 ## Step 2: Install Dependencies
 
@@ -111,14 +110,14 @@ If you need to generate public/private keys for more replicas or clients, you ca
 ./runscripts/smartrun.sh bftsmart.tom.util.RSAKeyPairGenerator <id> <key size>
 ```
 
-Keys are stored in the `config/keys` folder. The command above creates key pairs both for clients and replicas. Alternatively, you can set the `system.communication.defaultkeys` to `true` in the `config/system.config` file to forces all processes to use the same public/private keys pair and secret key. This is useful when deploying experiments and benchmarks, because it enables the programmer to avoid generating keys for all principals involved in the system. However, this must not be used in a real deployments.
+Keys are stored in the `config/keys` folder. The command above creates key pairs both for clients and replicas. Alternatively, you can set the `system.communication.defaultkeys` to `true` in the `config/system.config` file to force all processes to use the same public/private keys pair and secret key. This is useful when deploying experiments and benchmarks, because it enables the programmer to avoid generating keys for all principals involved in the system. However, this must not be used in real deployments.
 
 
 ## Step 5: Deployment in a WAN
 
 In this step you deploy the system in a WAN. You can launch several virtual machines in different regions. Note that every VM needs to have Java 11 installed to run the Java Bytecode. You will have to copy the build in
 `build/install/library`
-to every VM as wel las configuration files and keys.
+to every VM as well as configuration files and keys.
 Furthermore, note that firewall rules must be configured to allow TCP inbound and outbound traffic on the port range 11000 to 12000, or, the ports you defined yourself in Step 4.
 
 
@@ -144,7 +143,7 @@ Note that you passed the following parameters:
 **Important tip #3:** If you are getting timeout messages, it is possible that the application you are running takes too long to process the requests or the network delay is too high and PROPOSE messages from the leader does not arrive in time, so replicas may start the leader change protocol. To prevent that, try to increase the `system.totalordermulticast.timeout` parameter in 'config/system.config'.
 
 
-You need to repeat this procedure for all replicas on every VM, and increment the `<processId> ` for every replica. Make sure you use the the correct `<processId>` as you defined with the `hosts.conf` in Step 4.
+You need to repeat this procedure for all replicas on every VM, and increment the `<processId> ` for every replica. Make sure you use the correct `<processId>` as you defined with the `hosts.conf` in Step 4.
 
 
 ## Step 7: Running the Client(s)
@@ -163,7 +162,7 @@ Once all replicas are ready, the client can be launched as follows:
 
 ## Step 8 (optional): Testing/Evaluation of Client-side Speculation
 
-To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a seperate Client Implementation in `bftsmart.demo.ThroughputLatencyClientICG`
+To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate Client Implementation in `bftsmart.demo.ThroughputLatencyClientICG`
 
 
 ## Additional information and publications
@@ -178,4 +177,5 @@ If you are interested in learning more about BFT-SMaRt, you can read:
 - Mercury is published in [Middleware'24](https://arxiv.org/abs/2305.15000)
 
 ***Feel free to contact us if you have any questions!***
+
 
