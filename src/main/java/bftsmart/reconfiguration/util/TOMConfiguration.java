@@ -405,7 +405,7 @@ public class TOMConfiguration extends Configuration {
             }
 
             s = (String) configs.remove("system.useweights");
-            useWeights = (s != null) ? Boolean.parseBoolean(s) : false;
+            useWeights = (s != null) ? Boolean.parseBoolean(s) : true;
 
             if (useWeights) {
                 delta = n - ((isBFT ? 3 * f : 2 * f) + 1);
