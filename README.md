@@ -102,7 +102,7 @@ The servers must be specified in the configuration file (see `config/hosts.confi
 The system configurations also have to be specified (see `config/system.config`). A working configuration file is included but to understand the parameters we refer the interested reader to the paper.
 
 
-## Step 4 (optional) Generating Public/Private Key Pairs
+## Step 5 (optional) Generating Public/Private Key Pairs
 
 If you need to generate public/private keys for more replicas or clients, you can use the following command:
 
@@ -113,7 +113,7 @@ If you need to generate public/private keys for more replicas or clients, you ca
 Keys are stored in the `config/keys` folder. The command above creates key pairs both for clients and replicas. Alternatively, you can set the `system.communication.defaultkeys` to `true` in the `config/system.config` file to force all processes to use the same public/private keys pair and secret key. This is useful when deploying experiments and benchmarks, because it enables the programmer to avoid generating keys for all principals involved in the system. However, this must not be used in real deployments.
 
 
-## Step 5: Deployment in a WAN
+## Step 6: Deployment in a WAN
 
 In this step you deploy the system in a WAN. You can launch several virtual machines in different regions. Note that every VM needs to have Java 11 installed to run the Java Bytecode. You will have to copy the build in
 `build/install/library`
@@ -125,7 +125,7 @@ Furthermore, note that firewall rules must be configured to allow TCP inbound an
 
 
 
-## Step 6: Running the Replicas
+## Step 7: Running the Replicas
 
 
 You can run a single instance of a *ThrougputLatencyServer* (a replica used to conduct benchmarks) using the following command:
@@ -146,7 +146,7 @@ Note that you passed the following parameters:
 You need to repeat this procedure for all replicas on every VM, and increment the `<processId> ` for every replica. Make sure you use the correct `<processId>` as you defined with the `hosts.conf` in Step 4.
 
 
-## Step 7: Running the Client(s)
+## Step 8: Running the Client(s)
 
 **Important tip #4:** Clients requests should not be issued before all replicas have been properly initialized. Replicas are ready to process client requests when each one outputs `-- Ready to process operations` in the console.
 
@@ -160,10 +160,15 @@ Once all replicas are ready, the client can be launched as follows:
 
 **Important tip #5:** Always make sure that each client uses a unique ID. Otherwise, clients may not be able to complete their operations.
 
-## Step 8 (optional): Testing/Evaluation of Client-side Speculation
+## Step 9 (optional): Testing/Evaluation of Client-side Speculation
 
 To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate Client Implementation in `bftsmart.demo.ThroughputLatencyClientICG`
 
+
+## Step 10 (optional): Reproduce Results from the Paper
+
+Evaluation results depend on the speed of communication links in the WAN. Interestingly, we observed that links may become faster (to some extent) over large time intervals (years) because large cloud providers like Amazon AWS improve their infrastructure. For this purpose we provide latency data that allow an interested person to mimic the exact network characteristics by relying on high-fidelity network emulation/simulation tools like Kollaps and Shadow. 
+TODO...
 
 ## Additional information and publications
 
