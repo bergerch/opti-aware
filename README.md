@@ -53,7 +53,7 @@ Now you should have the most recent changes. Next step is to build the software.
 
 ## Step 2: Install Dependencies
 
-We use Java (v. 11) and Gradle (v 7.1) for this project. If you have them already installed on your computer, then just skip this step otherwise you need to install the. For your convenience you may try the commands below:
+We use Java (v. 11) and Gradle (v 7.1) for this project. If you have them already installed on your computer, then just skip this step otherwise you need to install them. For your convenience you may try the commands below:
 
 ```
 sudo apt install openjdk-11-jdk
@@ -63,7 +63,7 @@ sudo apt install openjdk-11-jdk
 mkdir .gradle
 cd .gradle
 wget https\://services.gradle.org/distributions/gradle-7.1-bin.zip
-sudo unzip -d . gradle-7.1-bin.zip
+unzip -d . gradle-7.1-bin.zip
 ```
 
 
