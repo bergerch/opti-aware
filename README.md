@@ -125,10 +125,10 @@ Keys are stored in the `config/keys` folder. The command above creates key pairs
 In this step you deploy the system in a WAN. You can launch several virtual machines in different regions. Note that every VM needs to have Java 11 installed to run the Java Bytecode. You will have to copy the build in
 `build/install/library`
 to every VM as well as configuration files and keys.
+
 Furthermore, note that firewall rules must be configured to allow TCP inbound and outbound traffic on the port range 11000 to 12000, or, the ports you defined yourself in Step 4.
 
-
-**Important tip #4:** Never forget to delete the `config/currentView` file after you modify `config/hosts.config` or `config/system.config`. If `config/currentView` exists, BFT-SMaRt always fetches the group configuration from this file first. Otherwise, BFT-SMaRt fetches information from the other files and creates `config/currentView` from scratch. Note that `config/currentView` only stores information related to the group of replicas. You do not need to delete this file if, for instance, you want to enable the debugger or change the value of the request timeout.
+**Important tip #4:** Never forget to delete the `config/currentView` file after you modify `config/hosts.config` or `config/system.config`. If `config/currentView` exists, BFT-SMaRt always fetches the group configuration from this file first. Otherwise, BFT-SMaRt fetches information from the other files and creates `config/currentView` from scratch. 
 
 
 
