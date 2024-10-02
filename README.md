@@ -123,8 +123,14 @@ Keys are stored in the `config/keys` folder. The command above creates key pairs
 ## Step 6: Deployment in a WAN
 
 In this step you deploy the system in a WAN. You can launch several virtual machines in different regions. Note that every VM needs to have Java 11 installed to run the Java Bytecode. You will have to copy the build in
-`build/install/library`
-to every VM as well as configuration files and keys.
+```
+build/install/library
+```
+which also already includes configuration files and keys to every VM (both replicas and clients!).
+For instance, we used AWS, 21 regions and `c5.xlarge` for each client and replica in every region. Regions are as outlined in:
+```
+data/aws/aws-servers.csv
+```
 
 Furthermore, note that firewall rules must be configured to allow TCP inbound and outbound traffic on the port range 11000 to 12000, or, the ports you defined yourself in Step 4.
 
