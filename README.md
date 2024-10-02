@@ -39,7 +39,7 @@ Check if the version you pulled from an online repo includes all recent changes 
 git clone git@github.com:bergerch/Mercury.git
 ```
 
-If you cloned this repository from a different source (i.e., the ACM repo) then add a remote and run this code to pull the most recent updates (in Mercury directoy):
+If you cloned this repository from a different source (i.e., the ACM repo) then add a remote and run this command to pull the most recent updates (in Mercury directoy):
 
 ```
 git remote add mercury https://github.com/bergerch/Mercury
@@ -162,13 +162,27 @@ Once all replicas are ready, the client can be launched as follows:
 
 ## Step 9 (optional): Testing/Evaluation of Client-side Speculation
 
-To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate Client Implementation in `bftsmart.demo.ThroughputLatencyClientICG`
+To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate implementations in 
+
+
+`bftsmart.demo.ThroughputLatencyClientICG`
 
 
 ## Step 10 (optional): Reproduce Results from the Paper
 
-Evaluation results depend on the speed of communication links in the WAN. Interestingly, we observed that links may become faster (to some extent) over large time intervals (years) because large cloud providers like Amazon AWS improve their infrastructure. For this purpose we provide latency data that allow an interested person to mimic the exact network characteristics by relying on high-fidelity network emulation/simulation tools like Kollaps and Shadow. 
-TODO...
+Evaluation results depend on the speed of communication links in the WAN. 
+Interestingly, we observed that links may become faster (to some extent) over large time intervals (years) because large cloud providers like Amazon AWS improve their infrastructure. For this purpose we provide latency data that allow an interested person to mimic the network characteristics we used by relying on high-fidelity network emulation/simulation tools like [Kollaps](https://github.com/miguelammatos/Kollaps) and [Shadow](https://github.com/shadow/shadow). 
+These latency data can be found in the directories:
+
+For the AWS setup with 21 regions see:
+```
+data/aws/aws.csv
+```
+
+For the wonderproxy setup with 51 regions see:
+```
+data/wonderproxy/wonderproxy.csv
+```
 
 ## Additional information and publications
 
