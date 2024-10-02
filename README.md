@@ -162,11 +162,22 @@ Once all replicas are ready, the client can be launched as follows:
 
 ## Step 9 (optional): Testing/Evaluation of Client-side Speculation
 
-To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate implementations in 
+To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate client implementation `ThroughputLatencyClientICG`. See:  
 
 
-`bftsmart.demo.ThroughputLatencyClientICG`
+```
+bftsmart.benchmark.ThroughputLatencyServer
+```
+```
+bftsmart.benchmark.ThroughputLatencyClientICG
+```
 
+Note that these `bftsmart.benchmark` implementations should also automatically store the results to the file system.
+
+**Important tip #5:** For parsing latency results from all clients from the different regions you may want to use a script after collecting the results. It may look similar to this:
+```
+cat bftSmartClient{0..20}/bftSmartClient*.java.*.stdout | grep "Average time for 1000 executions (-10%)" | sed 's/Average time for 1000 executions (-10%) = / /g' | sed 's/ \/\/  /, /g' | sed 's/us/ /g' > latencies.csv
+```
 
 ## Step 10 (optional): Reproduce Results from the Paper
 
