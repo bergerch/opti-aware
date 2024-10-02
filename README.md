@@ -94,9 +94,14 @@ The servers must be specified in the configuration file (see `config/hosts.confi
 1 127.0.0.1 11010 11011
 2 127.0.0.1 11020 11021
 3 127.0.0.1 11030 11031
+4 127.0.0.1 11040 11041
+5 127.0.0.1 11050 11051
+6 127.0.0.1 11060 11061
 ```
 
 **Important tip #1:** Always provide IP addresses instead of hostnames. If a machine running a replica is not correctly configured, BFT-SMaRt may fail to bind to the appropriate IP address and use the loopback address instead (127.0.0.1). This phenomenom may prevent clients and/or replicas from successfully establishing a connection among them.
+
+**Important tip #2:** You may want to specify at least **n=7** replicas, so that **f=2**. This is a recommended deployment configuration to observe the switching behavior of Mercury.
 
 
 The system configurations also have to be specified (see `config/system.config`). A working configuration file is included but to understand the parameters we refer the interested reader to the paper.
@@ -110,7 +115,9 @@ If you need to generate public/private keys for more replicas or clients, you ca
 ./runscripts/smartrun.sh bftsmart.tom.util.RSAKeyPairGenerator <id> <key size>
 ```
 
-Keys are stored in the `config/keys` folder. The command above creates key pairs both for clients and replicas. Alternatively, you can set the `system.communication.defaultkeys` to `true` in the `config/system.config` file to force all processes to use the same public/private keys pair and secret key. This is useful when deploying experiments and benchmarks, because it enables the programmer to avoid generating keys for all principals involved in the system. However, this must not be used in real deployments.
+Keys are stored in the `config/keys` folder. The command above creates key pairs both for clients and replicas. 
+
+**Important tip #3:** Alternatively, you can set the `system.communication.defaultkeys` to `true` in the `config/system.config` file to force all processes to use the same public/private keys pair and secret key. This is useful when deploying experiments and benchmarks, because it enables the programmer to avoid generating keys for all principals involved in the system. However, this must not be used in real deployments.
 
 
 ## Step 6: Deployment in a WAN
@@ -121,7 +128,7 @@ to every VM as well as configuration files and keys.
 Furthermore, note that firewall rules must be configured to allow TCP inbound and outbound traffic on the port range 11000 to 12000, or, the ports you defined yourself in Step 4.
 
 
-**Important tip #2:** Never forget to delete the `config/currentView` file after you modify `config/hosts.config` or `config/system.config`. If `config/currentView` exists, BFT-SMaRt always fetches the group configuration from this file first. Otherwise, BFT-SMaRt fetches information from the other files and creates `config/currentView` from scratch. Note that `config/currentView` only stores information related to the group of replicas. You do not need to delete this file if, for instance, you want to enable the debugger or change the value of the request timeout.
+**Important tip #4:** Never forget to delete the `config/currentView` file after you modify `config/hosts.config` or `config/system.config`. If `config/currentView` exists, BFT-SMaRt always fetches the group configuration from this file first. Otherwise, BFT-SMaRt fetches information from the other files and creates `config/currentView` from scratch. Note that `config/currentView` only stores information related to the group of replicas. You do not need to delete this file if, for instance, you want to enable the debugger or change the value of the request timeout.
 
 
 
@@ -140,7 +147,7 @@ Note that you passed the following parameters:
 `ThroughputLatencyServer <processId> <measurement interval> <reply size> <state size> <context?> <nosig | default | ecdsa> [rwd | rw]`
 
 
-**Important tip #3:** If you are getting timeout messages, it is possible that the application you are running takes too long to process the requests or the network delay is too high and PROPOSE messages from the leader does not arrive in time, so replicas may start the leader change protocol. To prevent that, try to increase the `system.totalordermulticast.timeout` parameter in 'config/system.config'.
+**Important tip #5:** If you are getting timeout messages, it is possible that the application you are running takes too long to process the requests or the network delay is too high and PROPOSE messages from the leader does not arrive in time, so replicas may start the leader change protocol. To prevent that, try to increase the `system.totalordermulticast.timeout` parameter in 'config/system.config'.
 
 
 You need to repeat this procedure for all replicas on every VM, and increment the `<processId> ` for every replica. Make sure you use the correct `<processId>` as you defined with the `hosts.conf` in Step 4.
@@ -148,7 +155,7 @@ You need to repeat this procedure for all replicas on every VM, and increment th
 
 ## Step 8: Running the Client(s)
 
-**Important tip #4:** Clients requests should not be issued before all replicas have been properly initialized. Replicas are ready to process client requests when each one outputs `-- Ready to process operations` in the console.
+**Important tip #6:** Clients requests should not be issued before all replicas have been properly initialized. Replicas are ready to process client requests when each one outputs `-- Ready to process operations` in the console.
 
 Once all replicas are ready, the client can be launched as follows:
 
@@ -158,7 +165,7 @@ Once all replicas are ready, the client can be launched as follows:
 
 `ThroughputLatencyClient <initial client id> <number of clients> <number of operations> <request size> <interval (ms)> <read only?> <verbose?> <nosig | default | ecdsa>`
 
-**Important tip #5:** Always make sure that each client uses a unique ID. Otherwise, clients may not be able to complete their operations.
+**Important tip #7:** Always make sure that each client uses a unique ID. Otherwise, clients may not be able to complete their operations.
 
 ## Step 9 (optional): Testing/Evaluation of Client-side Speculation
 
@@ -174,7 +181,7 @@ bftsmart.benchmark.ThroughputLatencyClientICG
 
 Note that these `bftsmart.benchmark` implementations should also automatically store the results to the file system.
 
-**Important tip #5:** For parsing latency results from all clients from the different regions you may want to use a script after collecting the results. It may look similar to this:
+**Important tip #8:** For parsing latency results from all clients from the different regions you may want to use a script after collecting the results. It may look similar to this:
 ```
 cat bftSmartClient{0..20}/bftSmartClient*.java.*.stdout | grep "Average time for 1000 executions (-10%)" | sed 's/Average time for 1000 executions (-10%) = / /g' | sed 's/ \/\/  /, /g' | sed 's/us/ /g' > latencies.csv
 ```
