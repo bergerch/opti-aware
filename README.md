@@ -107,7 +107,7 @@ The servers must be specified in the configuration file (see `config/hosts.confi
 The system configurations also have to be specified (see `config/system.config`). A working configuration file is included but to understand the parameters we refer the interested reader to the paper.
 
 
-## Step 5 (optional) Generating Public/Private Key Pairs
+## Step 5 (optional): Generating Public/Private Key Pairs
 
 If you need to generate public/private keys for more replicas or clients, you can use the following command:
 
@@ -147,7 +147,7 @@ Note that you passed the following parameters:
 `ThroughputLatencyServer <processId> <measurement interval> <reply size> <state size> <context?> <nosig | default | ecdsa> [rwd | rw]`
 
 
-**Important tip #5:** If you are getting timeout messages, it is possible that the application you are running takes too long to process the requests or the network delay is too high and PROPOSE messages from the leader does not arrive in time, so replicas may start the leader change protocol. To prevent that, try to increase the `system.totalordermulticast.timeout` parameter in 'config/system.config'.
+**Important tip #5:** If you are getting timeout messages, it is possible that the application you are running takes too long to process the requests or the network delay is too high and PROPOSE messages from the leader does not arrive in time, so replicas may start the leader change protocol. To prevent that, try to increase the `system.totalordermulticast.timeout` parameter in `config/system.config`.
 
 
 You need to repeat this procedure for all replicas on every VM, and increment the `<processId> ` for every replica. Make sure you use the correct `<processId>` as you defined with the `hosts.conf` in Step 4.
