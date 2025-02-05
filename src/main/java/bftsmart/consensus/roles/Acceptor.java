@@ -32,8 +32,6 @@ import bftsmart.consensus.Consensus;
 import bftsmart.tom.core.ExecutionManager;
 import bftsmart.consensus.Epoch;
 import bftsmart.consensus.messages.MessageFactory;
-import bftsmart.forensic.AuditProvider;
-import bftsmart.forensic.AuditStorage;
 import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.core.TOMLayer;
@@ -69,13 +67,6 @@ public final class Acceptor {
      */
     private PrivateKey privKey;
 
-    /**
-     * BEGIN Forensics
-     **/
-    private AuditProvider audit_provider;
-    /**
-     * END Forensics
-     **/
 
     /**
      * BEGIN AWARE
@@ -113,12 +104,6 @@ public final class Acceptor {
          */
         this.proofExecutor = Executors.newSingleThreadExecutor();
 
-        if (controller.getStaticConf().useForensics()) {
-            this.audit_provider = new AuditProvider(controller);
-            this.controller.registerAuditProvider(audit_provider);
-        } else {
-            this.audit_provider = null;
-        }
     }
 
     public MessageFactory getFactory() {
@@ -151,7 +136,7 @@ public final class Acceptor {
      * @param msg Paxos messages delivered by the communication layer
      */
     public final void deliver(ConsensusMessage msg) {
-        if (msg.getType() == MessageFactory.AUDIT || msg.getType() == MessageFactory.STORAGE || executionManager.checkLimits(msg)) {
+        if (executionManager.checkLimits(msg)) {
             logger.debug("Processing paxos msg with id " + msg.getNumber());
             processMessage(msg);
         } else {
@@ -182,14 +167,6 @@ public final class Acceptor {
             break;
             case MessageFactory.ACCEPT: {
                 acceptReceived(epoch, msg);
-            }
-            break;
-            case MessageFactory.AUDIT: {
-                auditReceived(epoch, msg);
-            }
-            break;
-            case MessageFactory.STORAGE: {
-                storageReceived(msg);
             }
             break;
         }
@@ -266,15 +243,10 @@ public final class Acceptor {
                     epoch.setWrite(me, epoch.propValueHash);
                     epoch.getConsensus().getDecision().firstMessageProposed.writeSentTime = System.nanoTime();
 
-                    /**
-                     * Forensics
-                     */
+
                     ConsensusMessage writeMessage = factory.createWrite(cid, epoch.getTimestamp(), epoch.propValueHash);
                     insertProof(writeMessage, epoch.deserializedPropValue); // insert proof in write message
-                    epoch.addWriteProof(writeMessage);
-                    /**
-                     *
-                     */
+
 
                     logger.debug("Sending WRITE for cId:{}, I am:{}", cid, me);
                     communication.send(this.controller.getCurrentViewOtherAcceptors(), writeMessage);
@@ -320,15 +292,6 @@ public final class Acceptor {
         int cid = epoch.getConsensus().getId();
         logger.debug("WRITE received from:{}, for consensus cId:{}", sender, cid);
         epoch.setWrite(sender, msg.getValue());
-
-        /**
-         * Forensics
-         */
-        epoch.addWriteProof(msg);
-        /**
-         *
-         */
-
         computeWrite(cid, epoch, msg.getValue());
     }
 
@@ -362,16 +325,7 @@ public final class Acceptor {
                 decide(epoch);
             } else if (!epoch.isAcceptSent()) { // code for standard execution
 
-                /**
-                 * Forensics
-                 * Who partecipated in write quorum
-                 */
-                if (audit_provider != null) {
-                    audit_provider.registerWrite(epoch, cid);
-                }
-                /**
-                 *
-                 */
+
 
                 logger.debug("Sending WRITE for " + cid);
                 // Logger.println("(Acceptor.computeWrite) sending WRITE for " + cid);
@@ -505,16 +459,7 @@ public final class Acceptor {
             // controller.getOverlayQuorum());
             logger.debug("Deciding consensus " + cid);
 
-            /**
-             * Forensics
-             * who partecipated in accept quorum
-             */
-            if (audit_provider != null) {
-                audit_provider.registerAccept(epoch, cid);
-            }
-            /**
-             *
-             */
+
 
             decide(epoch);
         }
@@ -530,106 +475,5 @@ public final class Acceptor {
             epoch.getConsensus().getDecision().firstMessageProposed.decisionTime = System.nanoTime();
 
         epoch.getConsensus().decided(epoch, true);
-
-        /**
-         * Forensics
-         */
-        // if (audit_provider != null
-        // // && (epoch.getConsensus().getId() + (me + 1)) % FORENSICS_INTERVAL == 0
-        // && audit_provider.getStorage().getSize() >=
-        // controller.getStaticConf().maxStorageSize()) {
-        // System.out.println("Begin audit in consensus " +
-        // epoch.getConsensus().getId());
-        // sendAudit(epoch.getConsensus().getId(), epoch);
-        // }
-        // if (audit_provider != null
-        // && audit_provider.getStorage().getSize() >=
-        // controller.getStaticConf().maxStorageSize()) {
-        // System.out.println("Reducing storage to last checkpoint " +
-        // controller.getLastCheckpoint());
-        // audit_provider.clean(controller.getLastCheckpoint());
-        // System.out.println("Current storage size = " +
-        // audit_provider.getStorage().getSize());
-        // if (audit_provider.getStorage().getSize() >=
-        // controller.getStaticConf().maxStorageSize()) {
-        // //if after clean up storage is still to bigm send audit
-        // System.out.println("STORAGE STILL TOO BIG");
-        // sendAudit(epoch.getConsensus().getId(), epoch);
-        // }
-        // }
-        /**
-         *
-         */
-    }
-
-    /*************************** FORENSICS METHODS *******************************/
-
-    /**
-     * Called when audit sender is client
-     * Receives audit message and sends storage to client
-     *
-     * @param msg message received
-     */
-    public void auditReceived(TOMMessage msg) {
-        long init_time = System.currentTimeMillis();
-        // System.out.println("Audit message received from " + msg.getSender());
-        TOMMessage response = new TOMMessage(me, msg.getSession(), msg.getSequence(), msg.getOperationId(), this.audit_provider.getStorage().toByteArray(), msg.getViewID(), TOMMessageType.AUDIT);
-        communication.getClientsConn().send(new int[]{msg.getSender()}, response, false); // send to storage to
-        // sender client
-        System.out.println("Time to send Storage: " + (System.currentTimeMillis() - init_time) + " ms");
-    }
-
-    /**
-     * Called when audit sender is replica
-     * Receives audit message and sends storage to sender replica
-     *
-     * @param epoch consensus epoch
-     * @param msg   consensus message
-     */
-    private void auditReceived(Epoch epoch, ConsensusMessage msg) {
-        System.out.println("Audit message received from " + msg.getSender());
-        ConsensusMessage cm = factory.createStorage(epoch.getConsensus().getId(), epoch.getTimestamp(), this.audit_provider.getStorage().toByteArray());
-        // System.out.println("Will send storage to " + msg.getSender());
-        communication.getServersConn().send(new int[]{msg.getSender()}, cm, true); // send storage to sender replica
-    }
-
-    /**
-     * Sends audit message to all replicas
-     *
-     * @param cid   consensus id
-     * @param epoch consensus epoch
-     */
-    private void sendAudit(int cid, Epoch epoch) {
-        int[] targets = this.controller.getCurrentViewOtherAcceptors();
-        ConsensusMessage cm = this.factory.createAudit(this.controller.getCurrentViewId());
-        communication.getServersConn().send(targets, cm, true);
-    }
-
-    /**
-     * Called when storage message is received
-     * Receives storage message and executes forensics
-     * prints conflict if found
-     *
-     * @param msg consensus message received
-     */
-    private void storageReceived(ConsensusMessage msg) {
-        if (audit_provider == null) {
-            return;
-        }
-        logger.debug("\n ================== STORAGE RECEIVED ================== \n\t-> Sender: " + msg.getSender());
-        // Thread t = new Thread() {
-        // public void run(){
-        AuditStorage receivedStorage = AuditStorage.fromByteArray(msg.getValue());
-        audit_provider.receiveStorage(receivedStorage);
-        // boolean success = audit_provider.compareStorages(receivedStorage);
-
-        // if (success) {
-        // System.out.println(" ======= AUDIT PERFORMED WITH SUCCESSS");
-        // } else {
-        // System.out.println(" ======= CONFLICT FOUND");
-        // }
-        // }
-        // };
-        // t.start();
     }
 }

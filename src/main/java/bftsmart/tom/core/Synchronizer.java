@@ -521,10 +521,6 @@ public class Synchronizer {
             
             if (!execManager.stopped()) execManager.stop(); // stop consensus execution if more than f replicas sent a STOP message
 
-            // If there is a need to leader change because of STOP Messages, also change to a safer configuration
-            // lr: perhaps this is the right place to do this? we are certain that a correct quorum of replicas timed out?
-            controller.switchToSaferConfig();
-
             logger.debug("Installing regency " + lcManager.getNextReg());
             lcManager.setLastReg(lcManager.getNextReg()); // define last timestamp
 

@@ -375,12 +375,6 @@ public final class TOMLayer extends Thread implements RequestReceiver {
         }
 
 
-        // Forensics, used when receiving audit message from Clients
-        if (msg.getReqType() == TOMMessageType.AUDIT) {
-            acceptor.auditReceived(msg);
-            return;
-        }
-
         // check if this request is valid and add it to the client' pending requests
         // list
         boolean readOnly = (msg.getReqType() == TOMMessageType.UNORDERED_REQUEST || msg.getReqType() == TOMMessageType.UNORDERED_HASHED_REQUEST);
@@ -480,7 +474,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
 
             if (!doWork) break;
 
-            //START Mercury:  block untils Mercury reconfiguration completes
+            //START Optilog:  block untils Optilog reconfiguration completes
             reconfigurationLock.lock();
             if ((getLastExec() % controller.getStaticConf().getCalculationInterval()) == controller.getStaticConf().getCalculationDelay()
                     && getLastExec() >= controller.getStaticConf().getCalculationInterval() + controller.getStaticConf().getCalculationDelay()
@@ -493,7 +487,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
             if (execManager.getCurrentLeader() != this.controller.getStaticConf().getProcessId()) {
                 continue;
             }
-            //END Mercury:  block untils Mercury reconfiguration completes
+            //END Optilog:  block untils Optilog reconfiguration completes
 
             logger.debug("I'm the leader.");
 

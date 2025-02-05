@@ -24,8 +24,6 @@ public class MessageFactory {
     public static final int PROPOSE = 44781;
     public static final int WRITE = 44782;
     public static final int ACCEPT = 44783;
-    public static final int AUDIT = 44784;
-    public static final int STORAGE = 44785;
 
     private int from; // Replica ID of the process which sent this message
 
@@ -85,64 +83,4 @@ public class MessageFactory {
         return new ConsensusMessage(ACCEPT, id, epoch, from, value);
 
     }
-
-    /*************************** FORENSICS METHODS *******************************/
-
-    /**
-     * Creates a AUDIT message to be sent by this process
-     * 
-     * @param id    Consensus's execution ID
-     * @param epoch Epoch number
-     * @param value Audit value, should contain cid intervals
-     * @return A consensus message of the AUDIT type, with the specified id, epoch,
-     *         and value
-     */
-    public ConsensusMessage createAudit(int id, int epoch) {
-        return new ConsensusMessage(AUDIT, id, epoch, from, null); // id and epoch should not be important
-    }
-
-    /**
-     * Creates a AUDIT message to be sent by this process
-     * 
-     * @param id    Consensus's execution ID
-     * @param value Audit value, should contain cid intervals
-     * @return A consensus message of the AUDIT type, with the specified id, epoch,
-     *         and value
-     */
-    public ConsensusMessage createAudit(int id) {
-        return new ConsensusMessage(AUDIT, id, 0, from, null); // id and epoch should not be important
-    }
-
-    /**
-     * Creates a AUDIT message sended by the client
-     * 
-     * @param id    Consensus's execution ID
-     * @param epoch Epoch number
-     * @param value Audit value, should contain cid intervals
-     * @return A consensus message of the AUDIT type, with the specified id, epoch,
-     *         and value
-     */
-    public ConsensusMessage createAudit(int client, byte[] value) {
-        return new ConsensusMessage(AUDIT, -1, -1, client, value); // id and epoch should not be important
-    }
-
-    /**
-     * Creates a STORAGE message to be sent by this process
-     * 
-     * @param id    Consensus's execution ID
-     * @param epoch Epoch number
-     * @param value STORAGE value, should be the storage
-     * @return A consensus message of the STORAGE type, with the specified id,
-     *         epoch,
-     *         and value
-     */
-    public ConsensusMessage createStorage(int id, int epoch, byte[] value) {
-        return new ConsensusMessage(STORAGE, id, epoch, from, value); // id and epoch should not be important
-    }
-
-    public ConsensusMessage createStorage(byte[] value) {
-        return new ConsensusMessage(STORAGE, -1, -1, from, value); // id and epoch should not be important
-    }
-
-
 }

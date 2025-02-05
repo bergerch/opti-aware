@@ -256,13 +256,6 @@ public class View implements Serializable {
         return hash;
     }
 
-    /**
-     * This method evaluates if the current configuration is the fastest possible
-     * @return true if current config is the fastest, false otherwise
-     */
-    public boolean isFastestConfig(){
-        return this.f ==  (int) Math.round((processes.length-1)/6.0); // it is faster configuration if t == T/2
-    }
 
     public boolean isSaferConfig(){
         return this.f == (processes.length - 1)/3;

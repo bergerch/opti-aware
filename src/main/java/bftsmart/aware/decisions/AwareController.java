@@ -207,45 +207,6 @@ public class AwareController {
         return best;
     }
 
-    public void audit(int cid) {
-        // int me = viewControl.getStaticConf().getProcessId();
-        // int interval = 250; // TODO change this to get from configuration file
-        // if (svc.getStaticConf().isUseDynamicWeights() && cid % 99 == 0 & cid > 0) {
-        // // todo hardcoded interval
-        // if (svc.getStaticConf().isUseDynamicWeights() && cid > 0 && cid % interval ==
-        // me * (interval/viewControl.getCurrentViewN())) {
-        int interval = viewControl.getStaticConf().getForensicsInterval();
-        if (svc.getStaticConf().isUseDynamicWeights() && cid > 0
-                && viewControl.getAuditProvider().getStorage().getSize() >= viewControl.getStaticConf()
-                        .minStorageSize()
-                && cid % interval == viewControl.getStaticConf().getProcessId()
-                        * (interval / viewControl.getCurrentViewN())) {
-
-            if (!svc.getStaticConf().getBackupForensics() && svc.inBackup()) {
-                logger.debug("======= NO NEED TO PERFORM FORENSICS =======");
-                viewControl.getAuditProvider().clean();
-                return;
-            }
-
-            if (!svc.getStaticConf().getFastForensics() && !svc.inBackup()) {
-                logger.debug("======= NO NEED TO PERFORM FORENSICS =======");
-                viewControl.getAuditProvider().clean();
-                return;
-            }
-
-            if(!svc.getStaticConf().getLeaderAudit() && currentDW.getLeader()==svc.getStaticConf().getProcessId()) { // leader only performs audit if desirable
-                viewControl.getAuditProvider().clean();
-                logger.debug("======= ( LEADER ) NO NEED TO PERFORM FORENSICS =======");
-                return;
-            }
-            // perform audit periodically
-            // System.out.println("Audit in consensus O + cid);
-            MessageFactory factory = new MessageFactory(svc.getStaticConf().getProcessId());
-            ConsensusMessage cm = factory.createAudit(svc.getCurrentViewId());
-            executionManager.getTOMLayer().getCommunication()
-                    .getServersConn().send(svc.getCurrentViewOtherAcceptors(), cm, true);
-        }
-    }
 
     /**
      * Optimizes weight distribution and leader selection, and threshold
@@ -257,10 +218,7 @@ public class AwareController {
         // Calculate a good configuration for a future reconfiguration
         if (svc.getStaticConf().isUseDynamicWeights()
                 && cid % svc.getStaticConf().getCalculationInterval() == 0 & cid > 0) {
-            // Mercury: check the next faster view if there is one
-           View v = (svc.getStaticConf().isAutoSwitching())
-                   ? svc.nextFasterConfig()
-                   : svc.getCurrentView();
+           View v = svc.getCurrentView();
 
 
            logger.info("Optimize system for next view " + v);
@@ -299,17 +257,6 @@ public class AwareController {
              * completed
              */
 
-            // Mercury: Currently: Periodically try to improve the threshold
-            boolean thresholdDecrease = false;
-            if (svc.getStaticConf().isAutoSwitching()) {
-                if (svc.getCurrentView().isFastestConfig()) {
-                    logger.info("###### NO SWITCH POSSIBLE ######");
-                } else {
-                    logger.info("###### SWITCH #####");
-                    //svc.switchToFasterConfig();
-                    thresholdDecrease = true;
-                }
-            }
 
             AwareController awareController = AwareController.getInstance(svc, executionManager);
             AwareConfiguration current = awareController.getCurrentDW();
@@ -325,12 +272,11 @@ public class AwareController {
 
             if (svc.getStaticConf().isUseDynamicWeights()
                     && ((!currentWeights.equals(bestWeights)
-                    && ((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal())
-                    || thresholdDecrease)
+                    && ((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal()))
             ) {
 
-                if (!thresholdDecrease)
-                    System.out.println("Opt.: Current config estimated: " + current.getPredictedLatency() + " and targeted is " +best.getPredictedLatency() );
+
+                System.out.println("Opt.: Current config estimated: " + current.getPredictedLatency() + " and targeted is " +best.getPredictedLatency() );
                 // The current weight configuration is not the best
                 // Deterministically change weights (this decision will be the same in all
                 // correct replicas)
@@ -338,17 +284,10 @@ public class AwareController {
                 View currentView = svc.getCurrentView();
 
                 View newView;
-                if (thresholdDecrease) {
-                    View thresholdDecresedView = svc.nextFasterConfig();
-                    newView = new View(thresholdDecresedView.getId(), thresholdDecresedView.getProcesses(),
-                            thresholdDecresedView.getF(),
-                            thresholdDecresedView.getAddresses(), thresholdDecresedView.isBFT(),
-                            thresholdDecresedView.getDelta(), bestWeights);
-                    logger.info("================== SWITCH to FAST ==================");
-                } else {
+
                     newView = new View(currentView.getId() + 1, currentView.getProcesses(), currentView.getF(),
                             currentView.getAddresses(), currentView.isBFT(), currentView.getDelta(), bestWeights);
-                }
+
 
                 /**
                  * Reconfigure the view here to adjust weights (and if possible also decrease

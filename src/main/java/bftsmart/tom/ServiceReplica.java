@@ -29,7 +29,6 @@ import bftsmart.tom.core.ExecutionManager;
 import bftsmart.consensus.messages.MessageFactory;
 import bftsmart.consensus.roles.Acceptor;
 import bftsmart.consensus.roles.Proposer;
-import bftsmart.forensic.AuditStorage;
 import bftsmart.reconfiguration.ReconfigureReply;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.reconfiguration.VMMessage;

@@ -165,19 +165,11 @@ public class NettyClientServerCommunicationSystemServerSide extends SimpleChanne
 
 
 
-			logger.info("Mercury Build 25. September 2024 | Extensions: ");
+			logger.info("Opti-AWARE Build 5. Feb 2025| Extensions: ");
 			logger.info("WHEAT Extensions [on/off]: " + (controller.getStaticConf().isUseWeights()?"on":"off"));
 			logger.info("AWARE Extensions [on/off]: " + (controller.getStaticConf().isUseDynamicWeights()?"on":"off"));
-			logger.info("Forensic Support [on/off]: " + (controller.getStaticConf().useForensics()?"on":"off"));
-			logger.info("Mecury Autoswitching [on/off]: " + (controller.getStaticConf().isAutoSwitching()?"on":"off"));
-			if (! (controller.getStaticConf().isUseWeights() && controller.getStaticConf().isUseDynamicWeights() &&
-					controller.getStaticConf().useForensics() && controller.getStaticConf().isAutoSwitching() )) {
-				logger.error("Misconfiguration: you are running Mercury Codebase but one ore more of the previous 4 " +
-						"necessary Extensions are disabled in your configuration file");
-			}
-			logger.info("Tentative Executions [on/off]" + (controller.getStaticConf().isTentative()?"on":"off"));
 
-            /** Mercury **/
+            /** Opilog-AWARE **/
             if (controller.getStaticConf().isUseWeights()) {
                 logger.info("Use dynamic weight adjustments (AWARE): " + controller.getStaticConf().isUseDynamicWeights());
                 logger.info("Use Leader selection optimization: " + controller.getStaticConf().isUseLeaderSelection());
@@ -190,7 +182,6 @@ public class NettyClientServerCommunicationSystemServerSide extends SimpleChanne
 				logger.info("Opt goal " + controller.getStaticConf().getOptimizationGoal());
 				logger.info("SyncDelay " + controller.getStaticConf().getSynchronisationDelay());
 				logger.info("SyncPeriod " + controller.getStaticConf().getSynchronisationPeriod());
-				logger.info("Granularity: " + controller.getStaticConf().getGranularity());
             }
 
 			/* Tulio Ribeiro */

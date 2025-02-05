@@ -97,15 +97,6 @@ public class TOMConfiguration extends Configuration {
     private int synchronisationPeriod;
     private int synchronisationDelay;
 
-    // Mercury
-    private boolean useforensics;
-    private int min_storage_size;
-    private int granularity;
-    private boolean backupforensics;
-    private boolean fastforensics;
-    private int forensicsInterval;
-    private boolean leaderAudit;
-    private int auditthreads;
 
     /** Creates a new instance of TOMConfiguration */
     public TOMConfiguration(int processId, KeyLoader loader) {
@@ -511,32 +502,6 @@ public class TOMConfiguration extends Configuration {
                 clientInvokeOrderedTimeout = Integer.parseInt(s);
             }
 
-            /** Mercury **/
-
-            s = (String) configs.remove("system.mercury.useforensics");
-            useforensics = s == null ? false : Boolean.parseBoolean(s);
-
-            s = (String) configs.remove("system.mercury.storagesize");
-            min_storage_size = s == null ? 1000 : Integer.parseInt(s);
-
-            s = (String) configs.remove("system.mercury.granularity");
-            granularity = s == null ? 1 : Integer.parseInt(s);
-
-            s = (String) configs.remove("system.mercury.backupforensics");
-            backupforensics = s == null ? true : Boolean.parseBoolean(s);
-
-            s = (String) configs.remove("system.mercury.fastforensics");
-            fastforensics = s == null ? true : Boolean.parseBoolean(s);
-
-            s = (String) configs.remove("system.mercury.forensicsinterval");
-            forensicsInterval = s == null ? 1000 : Integer.parseInt(s);
-
-            s = (String) configs.remove("system.mercury.leaderaudit");
-            leaderAudit = s == null ? true : Boolean.parseBoolean(s);
-
-            s = (String) configs.remove("system.mercury.auditthreads");
-            auditthreads = s == null ? 1 : Integer.parseInt(s);
-
         } catch (Exception e) {
             logger.error("Could not parse system configuration file", e);
         }
@@ -831,36 +796,4 @@ public class TOMConfiguration extends Configuration {
         this.synchronisationDelay = synchronisationDelay;
     }
 
-    // Mercury
-    public boolean useForensics() {
-        return useforensics;
-    }
-
-    public int minStorageSize() {
-        return min_storage_size;
-    }
-
-    public int getGranularity(){
-        return granularity;
-    }
-
-    public boolean getBackupForensics(){
-        return backupforensics;
-    }
-
-    public boolean getFastForensics(){
-        return fastforensics;
-    }
-
-    public int getForensicsInterval(){
-        return forensicsInterval;
-    }
-
-    public boolean getLeaderAudit(){
-        return leaderAudit;
-    }
-
-    public int getNumberOfAuditThreads(){
-        return auditthreads;
-    }
 }

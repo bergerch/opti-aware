@@ -302,16 +302,10 @@ public final class DeliveryThread extends Thread {
 						count++;
 
 						/**
-						 *  Mercury
+						 *  OptiLog
 						 */
 						Monitor.getInstance(controller).handleMonitoringMessages(d);
-						// Audit should only happen here if storage is to big
-						if (controller.getStaticConf().useForensics()) {
-							AwareController.getInstance(controller, tomLayer.execManager).audit(d.getConsensusId());
-						}
 						AwareController.getInstance(controller, tomLayer.execManager).optimize(d.getConsensusId());
-						/**
-						 **/
 					}
 
 					Decision lastDecision = decisions.get(decisions.size() - 1);

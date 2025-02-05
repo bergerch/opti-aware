@@ -129,13 +129,6 @@ public class Configuration {
 				hashAlgorithm = s;
 			}
 
-			s = (String) configs.remove("system.mercury.autoswitching");
-			if (s == null) {
-				this.autoSwitching = false;
-			} else {
-				this.autoSwitching = Boolean.parseBoolean(s);
-			}
-
 			s = (String) configs.remove("system.communication.secretKeyAlgorithmProvider");
 			if (s == null) {
 				secretKeyAlgorithmProvider = DEFAULT_SECRETKEY_PROVIDER;

@@ -23,7 +23,6 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 
 import bftsmart.consensus.messages.ConsensusMessage;
-import bftsmart.forensic.Aggregate;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.reconfiguration.views.View;
 import bftsmart.tom.core.messages.TOMMessage;
@@ -69,10 +68,8 @@ public class Epoch implements Serializable {
     private double[] sumWeightsWrite;
     private double[] sumWeightsAccept;
 
-    // Forensics
     private HashSet<ConsensusMessage> writeProofs; // write proof
-    private Aggregate writeAgg;
-    private Aggregate acceptAgg;
+
 
     /**
      * Creates a new instance of Epoch for acceptors
@@ -126,7 +123,6 @@ public class Epoch implements Serializable {
 
         }
 
-        // Forensics
         this.writeProofs = new HashSet<>();
     }
 
@@ -317,7 +313,7 @@ public class Epoch implements Serializable {
             write[p] = value;
             writeSetted[p] = true;
             if (sumWeightsWrite != null)
-                 sumWeightsWrite[p]  = this.controller.getCurrentView().getWeight(acceptor);
+                sumWeightsWrite[p] = this.controller.getCurrentView().getWeight(acceptor);
         }
         // ******* EDUARDO END **************//
     }
@@ -365,7 +361,7 @@ public class Epoch implements Serializable {
         if (p >= 0 /* && !strongSetted[p] && !isFrozen() */) { // it can only be setted once
             accept[p] = value;
             acceptSetted[p] = true;
-            sumWeightsAccept[p]  = this.controller.getCurrentView().getWeight(acceptor);
+            sumWeightsAccept[p] = this.controller.getCurrentView().getWeight(acceptor);
         }
         // ******* EDUARDO END **************//
     }
@@ -376,7 +372,7 @@ public class Epoch implements Serializable {
      *
      * @param value The value in question
      * @return Amount of replicas from which this process received the specified
-     *         value
+     * value
      */
     public int countWrite(byte[] value) {
         return count(writeSetted, write, value);
@@ -388,7 +384,7 @@ public class Epoch implements Serializable {
      *
      * @param value The value in question
      * @return Amount of replicas from which this process accepted the specified
-     *         value
+     * value
      */
     public int countAccept(byte[] value) {
         return count(acceptSetted, accept, value);
@@ -491,26 +487,30 @@ public class Epoch implements Serializable {
         }
         return 0;
     }
+
     /**
      * Retrieves the total weights from which this process received a WRITE value
+     *
      * @param value The value in question
      * @return total weights from which this process received the specified value
      */
     public synchronized double countWriteWeigths(byte[] value) {
-        return countWeigths(writeSetted,sumWeightsWrite, write, value);
+        return countWeigths(writeSetted, sumWeightsWrite, write, value);
     }
 
     /**
      * Retrieves the total weights from which this process accepted a specified value
+     *
      * @param value The value in question
      * @return total weights from which this process accepted the specified value
      */
     public synchronized double countAcceptWeigths(byte[] value) {
-        return countWeigths(acceptSetted,sumWeightsAccept, accept, value);
+        return countWeigths(acceptSetted, sumWeightsAccept, accept, value);
     }
 
     /**
      * Counts how many times 'value' occurs in 'array'
+     *
      * @param array Array where to count
      * @param value Value to count
      * @return Ammount of times that 'value' was find in 'array'
@@ -592,33 +592,11 @@ public class Epoch implements Serializable {
         this.acceptCreated = false;
     }
 
-    /*************************** FORENSICS METHODS *******************************/
-
-    public void addWriteProof(ConsensusMessage proof) {
-        this.writeProofs.add(proof);
-    }
 
     public Set<ConsensusMessage> getWriteProof() {
         return this.writeProofs;
     }
 
-    public void createWriteAggregate() {
-        if (this.writeAgg == null) {
-            this.writeAgg = new Aggregate(this.writeProofs);
-        }
-    }
-
-    public Aggregate getWriteAggregate() {
-        return this.writeAgg;
-    }
-
-    public void createAcceptAggregate() {
-        if (this.acceptAgg == null) {
-            this.acceptAgg = new Aggregate(this.proof);
-        }
-    }
-
-    public Aggregate getAcceptAggregate() {
-        return this.acceptAgg;
-    }
 }
+
+

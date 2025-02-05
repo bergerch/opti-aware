@@ -26,7 +26,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import bftsmart.forensic.AuditStorage;
 import bftsmart.reconfiguration.ReconfigureReply;
 import bftsmart.reconfiguration.views.View;
 import bftsmart.tom.core.messages.TOMMessage;
@@ -346,9 +345,7 @@ public class ServiceProxy extends TOMSender {
 						canSendLock.unlock();
 						return invoke(request, TOMMessageType.ORDERED_REQUEST);
 					}
-				} else if (reqType == TOMMessageType.AUDIT) { // Forensics
-					ret = response.getContent();
-				} else {
+				}  else {
 					if (response.getViewID() > getViewManager().getCurrentViewId()) {
 						// Reply to a reconfigure request!
 						logger.debug("Reconfiguration request' reply received!");
@@ -439,34 +436,7 @@ public class ServiceProxy extends TOMSender {
 					}
 					replies[pos] = reply;
 
-					/**
-					 * Forensics
-					 */
-					if (requestType == TOMMessageType.AUDIT) {
-						if (receivedReplies >= getViewManager().getCurrentViewN() - getViewManager().getCurrentViewT()) { // wait for 2f ??
 
-							List<AuditStorage> storages = new ArrayList<>();
-
-							for (TOMMessage tomm : replies) {
-								if (tomm != null) {
-									storages.add(AuditStorage.fromByteArray(tomm.getContent()));
-								}
-							}
-
-							byte[] content = TOMUtil.getBytes(storages);
-
-							response = new TOMMessage(1001, reply.getSession(), reply.getSequence(),
-									reply.getOperationId(), content, reply.getViewID(), TOMMessageType.AUDIT);
-
-							// Not sure on this
-							reqId = -1;
-							this.sm.release();
-						}
-					} /**
-					 * END Forensics
-					 */
-
-					else {
 
 						// Compare the reply just received, to the others
 
@@ -489,7 +459,7 @@ public class ServiceProxy extends TOMSender {
 								return;}
 							}
 						}
-					}
+
 				}
 
 				if (response == null) {

@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import bftsmart.forensic.AuditProvider;
 import bftsmart.reconfiguration.views.View;
 import bftsmart.tom.core.TOMLayer;
 import bftsmart.tom.core.messages.TOMMessage;
@@ -58,15 +57,7 @@ public class ServerViewController extends ViewController {
 
     private int last_checkpoint;
 
-    /**
-     * Mercury
-     */
-    private AuditProvider auditProvider;
-    private int K = -1; // granularity
 
-    /**
-     * 
-     */
 
     public ServerViewController(int procId, KeyLoader loader) {
         this(procId, "", loader);
@@ -91,7 +82,6 @@ public class ServerViewController extends ViewController {
             logger.info("Using view stored on disk");
             reconfigureTo(cv);
         }
-        this.K = this.getStaticConf().getGranularity();
     }
 
     private InetSocketAddress[] getInitAdddresses() {
@@ -332,49 +322,6 @@ public class ServerViewController extends ViewController {
         return getStaticConf().isBFT() ? overlayQ_BFT : overlayQ_CFT;
     }
 
-    /*************************** SWITCH METHODS *******************************/
-
-    public void switchToSaferConfig() {
-        System.out.println("================== SWITCH to SAFE ==================");
-        View currentView = this.getCurrentView();
-        if (currentView.isSaferConfig()) {
-            logger.info("============== Already safest config ==============");
-            return;
-        }
-
-        int N = currentView.getProcesses().length;
-        int max_faults = max_fault(N);
-        int new_faults = Math.min(max_faults, currentView.getF() + K);
-        int new_delta = calculateDelta(N, new_faults);
-        View newView = new View(currentView.getId() + 1, currentView.getProcesses(), new_faults,
-                currentView.getAddresses(), currentView.isBFT(), new_delta);
-        this.reconfigureTo(newView);
-    }
-
-    public View nextFasterConfig() {
-        View currentView = this.getCurrentView();
-        if (currentView.isFastestConfig())
-            return currentView;
-
-        int N = currentView.getProcesses().length;
-        int max_faults = max_fault(N);
-        int new_faults = Math.max((int) Math.round(max_faults / 2.0), currentView.getF() - K);
-        int new_delta = calculateDelta(N, new_faults);
-        View newView = new View(currentView.getId() + 1, currentView.getProcesses(), new_faults,
-                currentView.getAddresses(), currentView.isBFT(), new_delta);
-        return newView;
-    }
-
-    public void switchToFasterConfig() {
-        System.out.println("================== SWITCH to FAST ==================");
-        View currentView = this.getCurrentView();
-        if (currentView.isFastestConfig())
-            return;
-
-        View newView = this.nextFasterConfig();
-        this.reconfigureTo(newView);
-    }
-
     public boolean inBackup() {
         return maxFault() == this.getCurrentViewF();
     }
@@ -403,11 +350,4 @@ public class ServerViewController extends ViewController {
         this.last_checkpoint = cid;
     }
 
-    public void registerAuditProvider(AuditProvider audit_provider) {
-        this.auditProvider = audit_provider;
-    }
-
-    public AuditProvider getAuditProvider() {
-        return auditProvider;
-    }
 }
