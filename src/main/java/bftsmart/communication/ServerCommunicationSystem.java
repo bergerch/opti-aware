@@ -53,8 +53,8 @@ public class ServerCommunicationSystem extends Thread {
     private ServerViewController controller;
 
     /** AWARE **/
-    public LatencySensor writeLatencyMonitor = null;
-    public LatencySensor proposeLatencyMonitor = null;
+    public LatencySensor writeLatencySensor = null;
+    public LatencySensor proposeLatencySensor = null;
 
     /**
      * Creates a new instance of ServerCommunicationSystem
@@ -72,11 +72,11 @@ public class ServerCommunicationSystem extends Thread {
 
         /** AWARE **/
         if (controller.getStaticConf().isUseDynamicWeights())
-            writeLatencyMonitor = LatencyMonitor.getInstance(controller).getWriteLatencySensor();
+            writeLatencySensor = LatencyMonitor.getInstance(controller).getWriteLatencySensor();
 
         /** AWARE **/
         if (controller.getStaticConf().isUseDynamicWeights() && controller.getStaticConf().isUseDummyPropose())
-            proposeLatencyMonitor = LatencyMonitor.getInstance(controller).getProposeLatencySensor();
+            proposeLatencySensor = LatencyMonitor.getInstance(controller).getProposeLatencySensor();
 
 
 

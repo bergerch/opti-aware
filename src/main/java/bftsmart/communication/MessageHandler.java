@@ -176,11 +176,11 @@ public class MessageHandler {
                             }
                             break;
                         case "PROPOSE_RESPONSE":
-                            tomLayer.getCommunication().proposeLatencyMonitor.addRecvdTime(sm.sender,
+                            tomLayer.getCommunication().proposeLatencySensor.addRecvdTime(sm.sender,
                                     ((LatencyMonitoringMessage) sm).getNumber(), ((LatencyMonitoringMessage) sm).getChallenge());
                             break;
                         case "WRITE_RESPONSE":
-                            tomLayer.getCommunication().writeLatencyMonitor.addRecvdTime(sm.sender,
+                            tomLayer.getCommunication().writeLatencySensor.addRecvdTime(sm.sender,
                                     ((LatencyMonitoringMessage) sm).getNumber(), ((LatencyMonitoringMessage) sm).getChallenge());
                             break;
                         default:

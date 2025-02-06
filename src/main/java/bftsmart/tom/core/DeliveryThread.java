@@ -304,7 +304,7 @@ public final class DeliveryThread extends Thread {
 						/**
 						 *  OptiLog
 						 */
-						LatencyMonitor.getInstance(controller).handleMonitoringMessages(d);
+						LatencyMonitor.getInstance(controller).onReceiveMonitoringMessage(d);
 						AwareController.getInstance(controller, tomLayer.execManager).optimize(d.getConsensusId());
 					}
 

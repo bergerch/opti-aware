@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,10 +19,13 @@ import java.util.TimerTask;
  */
 public class GlobalSynchronizer {
 
+    private static GlobalSynchronizer instance;
+
     private ServiceProxy consensusEngine;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private List<Monitor> monitors = new ArrayList<>();
 
     /**
      * Creates a new Synchronizer to disseminate data with total order
@@ -50,6 +55,17 @@ public class GlobalSynchronizer {
                 logger.debug("|---> Disseminating monitoring information with total order! ");
             }
         }, svc.getStaticConf().getSynchronisationDelay(), svc.getStaticConf().getSynchronisationPeriod());
+    }
+
+    public GlobalSynchronizer getInstance(ServerViewController svc) {
+        if (GlobalSynchronizer.instance == null) {
+            GlobalSynchronizer.instance = new GlobalSynchronizer(svc);
+        }
+        return GlobalSynchronizer.instance;
+    }
+
+    public void attachMonitor(Monitor monitor) {
+        monitors.add(monitor);
     }
 
     /**
@@ -87,6 +103,7 @@ public class GlobalSynchronizer {
         dis.close();
         return result;
     }
+
 
 
 }

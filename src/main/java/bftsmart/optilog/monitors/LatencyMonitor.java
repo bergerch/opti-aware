@@ -4,21 +4,19 @@ import bftsmart.consensus.Decision;
 import bftsmart.consensus.Epoch;
 import bftsmart.optilog.GlobalSynchronizer;
 import bftsmart.optilog.LatencyMeasurement;
+import bftsmart.optilog.Monitor;
 import bftsmart.optilog.sensors.LatencySensor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.core.messages.TOMMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * Singelton pattern. Only one instance of Monitor should be used
  *
  * @author cb
  */
-public class LatencyMonitor {
+public class LatencyMonitor implements Monitor {
 
     private static final int MONITORING_DELAY = 10 * 1000;
     private static final int MONITORING_PERIOD = 10 * 1000;
@@ -39,9 +37,10 @@ public class LatencyMonitor {
     // A timed synchronizer which will peridically disseminate monitoring, invokes them with total order
     private GlobalSynchronizer monitoringDataSynchronizer;
 
+    // Was only used for debugging: TODO: Remove later
     // The latencies the current process measures from its own perspective
-    private Long[] freshestProposeLatencies;
-    private Long[] freshestWriteLatencies;
+    // private Long[] freshestProposeLatencies;
+    // private Long[] freshestWriteLatencies;
 
     // The measured latency matrices which have been disseminated with total order
     // They are the same in all replicas for a defined consensus id, after all TOMMessages within this consensus
@@ -65,6 +64,7 @@ public class LatencyMonitor {
 
         init(n);
 
+        /*
         // Periodically compute point-to-point latencies
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -76,6 +76,8 @@ public class LatencyMonitor {
                 freshestProposeLatencies = proposeLatencySensor.create_L("PROPOSE");
             }
         }, MONITORING_DELAY, MONITORING_PERIOD);
+        */
+
     }
 
     /**
@@ -118,7 +120,7 @@ public class LatencyMonitor {
      * @param epoch contains the decision
      * @param cid consensus id
      */
-    public void handleMonitoringMessages(Epoch epoch, int cid) {
+    public void onReceiveMonitoringMessage(Epoch epoch, int cid) {
         if (svc.getStaticConf().isUseDynamicWeights()) {
             for (TOMMessage tm : epoch.getConsensus().getDecision().getDeserializedValue()) {
                 if (tm.getIsMonitoringMessage()) {
@@ -129,7 +131,7 @@ public class LatencyMonitor {
         }
     }
 
-    public void handleMonitoringMessages(Decision decision) {
+    public void onReceiveMonitoringMessage(Decision decision) {
         if (svc.getStaticConf().isUseDynamicWeights()) {
             for (TOMMessage tm : decision.getDeserializedValue()) {
                 if (tm.getIsMonitoringMessage()) {
