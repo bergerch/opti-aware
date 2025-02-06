@@ -1,13 +1,10 @@
 package bftsmart.optilog.monitors;
 
-import bftsmart.consensus.Decision;
-import bftsmart.consensus.Epoch;
 import bftsmart.optilog.GlobalSynchronizer;
-import bftsmart.optilog.LatencyMeasurement;
+import bftsmart.optilog.sensors.LatencyMeasurement;
 import bftsmart.optilog.Monitor;
 import bftsmart.optilog.sensors.LatencySensor;
 import bftsmart.reconfiguration.ServerViewController;
-import bftsmart.tom.core.messages.TOMMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,43 +112,15 @@ public class LatencyMonitor implements Monitor {
 
 
     /**
-     * Processes measurements decided in some consensus
-     *
-     * @param epoch contains the decision
-     * @param cid consensus id
-     */
-    public void onReceiveMonitoringMessage(Epoch epoch, int cid) {
-        if (svc.getStaticConf().isUseDynamicWeights()) {
-            for (TOMMessage tm : epoch.getConsensus().getDecision().getDeserializedValue()) {
-                if (tm.getIsMonitoringMessage()) {
-                    logger.debug("Received disseminated monitoring message ");
-                    onReceiveMonitoringInformation(tm.getSender(), tm.getContent(), cid);
-                }
-            }
-        }
-    }
-
-    public void onReceiveMonitoringMessage(Decision decision) {
-        if (svc.getStaticConf().isUseDynamicWeights()) {
-            for (TOMMessage tm : decision.getDeserializedValue()) {
-                if (tm.getIsMonitoringMessage()) {
-                    logger.debug("Received disseminated monitoring message ");
-                    onReceiveMonitoringInformation(tm.getSender(), tm.getContent(), decision.getConsensusId());
-                }
-            }
-        }
-    }
-
-    /**
      * Gets called when a consensus completes and the consensus includes monitoring TOMMessages with measurement information
      * @param sender      a replica reporting its own measurement from its own perspective
      * @param value       a byte array containing the measurements
      * @param consensusID the specified consensus instance
      */
-    private void onReceiveMonitoringInformation(int sender, byte[] value, int consensusID) {
+    public void notify(int sender, byte[] measurement, int consensusID) {
         int n = svc.getCurrentViewN();
 
-        LatencyMeasurement li = LatencyMeasurement.fromBytes(value);
+        LatencyMeasurement li = LatencyMeasurement.fromBytes(measurement);
         m_write[sender] = li.writeLatencies;
         m_propose[sender] = li.proposeLatencies;
 

@@ -17,6 +17,7 @@ package bftsmart.tom.core;
 
 import bftsmart.aware.decisions.AwareController;
 import bftsmart.consensus.Decision;
+import bftsmart.optilog.AppendOnlyLog;
 import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.statemanagement.ApplicationState;
@@ -304,7 +305,7 @@ public final class DeliveryThread extends Thread {
 						/**
 						 *  OptiLog
 						 */
-						LatencyMonitor.getInstance(controller).onReceiveMonitoringMessage(d);
+						AppendOnlyLog.getInstance(controller).record(d);
 						AwareController.getInstance(controller, tomLayer.execManager).optimize(d.getConsensusId());
 					}
 

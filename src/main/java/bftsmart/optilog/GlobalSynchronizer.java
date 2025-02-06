@@ -1,6 +1,7 @@
 package bftsmart.optilog;
 
 import bftsmart.optilog.monitors.LatencyMonitor;
+import bftsmart.optilog.sensors.LatencyMeasurement;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceProxy;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package bftsmart.optilog;
+package bftsmart.optilog.sensors;
 
 import bftsmart.optilog.monitors.LatencyMonitor;
 
