@@ -17,7 +17,7 @@ package bftsmart.tom.core;
 
 import bftsmart.aware.decisions.AwareController;
 import bftsmart.consensus.Decision;
-import bftsmart.aware.monitoring.Monitor;
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.statemanagement.ApplicationState;
 import bftsmart.tom.MessageContext;
@@ -245,7 +245,7 @@ public final class DeliveryThread extends Thread {
                     init = false;
 					/** AWARE **/
 					if (controller.getStaticConf().isUseDynamicWeights())
-						Monitor.getInstance(controller).startSync();
+						LatencyMonitor.getInstance(controller).startSync();
 					/** End AWARE **/
                 }
             }
@@ -304,7 +304,7 @@ public final class DeliveryThread extends Thread {
 						/**
 						 *  OptiLog
 						 */
-						Monitor.getInstance(controller).handleMonitoringMessages(d);
+						LatencyMonitor.getInstance(controller).handleMonitoringMessages(d);
 						AwareController.getInstance(controller, tomLayer.execManager).optimize(d.getConsensusId());
 					}
 

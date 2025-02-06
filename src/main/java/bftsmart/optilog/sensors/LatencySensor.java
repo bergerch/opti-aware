@@ -1,5 +1,6 @@
-package bftsmart.aware.monitoring;
+package bftsmart.optilog.sensors;
 
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,7 @@ import java.util.*;
  *
  * @author cb
  */
-public class MessageLatencyMonitor {
+public class LatencySensor {
 
     private int window;
     private ServerViewController controller;
@@ -29,7 +30,7 @@ public class MessageLatencyMonitor {
      *
      * @param controller server view controller
      */
-    public MessageLatencyMonitor(ServerViewController controller) {
+    public LatencySensor(ServerViewController controller) {
         this.window = controller.getStaticConf().getMonitoringWindow();
         this.controller = controller;
         init();
@@ -142,7 +143,7 @@ public class MessageLatencyMonitor {
             }
             latencies.sort(Comparator.naturalOrder());
             // If there are not latencies (e.g. a replica crashed) report with -1 (Failure value)
-            Long medianValue = latencies.size() > 0 ? latencies.get(latencies.size() / 2) : Monitor.MISSING_VALUE;
+            Long medianValue = latencies.size() > 0 ? latencies.get(latencies.size() / 2) : LatencyMonitor.MISSING_VALUE;
             latency_vector[i] = medianValue;
             // logger.info("-- Size of " + replicaRecvdTimes.size());
         }
@@ -182,7 +183,7 @@ public class MessageLatencyMonitor {
         result += ("    0       1       2        3        4        ....    \n");
         result += ("...............................................................\n");
         for (double d : m) {
-            if (d >= 0 && d < Monitor.MISSING_VALUE) {
+            if (d >= 0 && d < LatencyMonitor.MISSING_VALUE) {
                 result = result + "  " + d + "  ";
             } else {
                 result += "silent";
@@ -191,7 +192,7 @@ public class MessageLatencyMonitor {
         result += "\n";
         result += ("...............................................................\n");
         result += "\n";
-        final Logger logger = LoggerFactory.getLogger("bftsmart.aware.monitoring.MessageLatencyMonitor");
+        final Logger logger = LoggerFactory.getLogger("bftsmart.optilog.monitoring.MessageLatencyMonitor");
         logger.info(result);
     }
 

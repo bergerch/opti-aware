@@ -1,5 +1,6 @@
-package bftsmart.aware.monitoring;
+package bftsmart.optilog;
 
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceProxy;
 import org.slf4j.Logger;
@@ -14,9 +15,9 @@ import java.util.TimerTask;
  *
  * @author cb
  */
-public class MonitoringDataSynchronizer {
+public class GlobalSynchronizer {
 
-    private ServiceProxy monitoringDataDisseminationProxy;
+    private ServiceProxy consensusEngine;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -26,10 +27,10 @@ public class MonitoringDataSynchronizer {
      *
      * @param svc server view controller
      */
-    MonitoringDataSynchronizer(ServerViewController svc) {
+    public GlobalSynchronizer(ServerViewController svc) {
 
         int myID = svc.getStaticConf().getProcessId();
-        monitoringDataDisseminationProxy = new ServiceProxy(myID);
+        consensusEngine = new ServiceProxy(myID);
 
         // Create a time to periodically broadcast this replica's measurements to all replicas
         Timer timer = new Timer();
@@ -38,13 +39,13 @@ public class MonitoringDataSynchronizer {
             public void run() {
 
                 // Get freshest write latenciesfrom Monitor
-                Long[] writeLatencies = Monitor.getInstance(svc).getFreshestWriteLatencies();
-                Long[] proposeLatencies = Monitor.getInstance(svc).getFreshestProposeLatencies();
+                Long[] writeLatencies = LatencyMonitor.getInstance(svc).getFreshestWriteLatencies();
+                Long[] proposeLatencies = LatencyMonitor.getInstance(svc).getFreshestProposeLatencies();
 
-                Measurements li = new Measurements(svc.getCurrentViewN(), writeLatencies, proposeLatencies);
+                LatencyMeasurement li = new LatencyMeasurement(svc.getCurrentViewN(), writeLatencies, proposeLatencies);
                 byte[] data = li.toBytes();
 
-                monitoringDataDisseminationProxy.invokeOrderedMonitoring(data);
+                consensusEngine.invokeOrderedMonitoring(data);
 
                 logger.debug("|---> Disseminating monitoring information with total order! ");
             }

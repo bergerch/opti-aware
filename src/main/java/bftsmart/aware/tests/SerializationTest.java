@@ -1,7 +1,7 @@
 package bftsmart.aware.tests;
 
-import static bftsmart.aware.monitoring.MonitoringDataSynchronizer.bytesToLong;
-import static bftsmart.aware.monitoring.MonitoringDataSynchronizer.longToBytes;
+import static bftsmart.optilog.GlobalSynchronizer.bytesToLong;
+import static bftsmart.optilog.GlobalSynchronizer.longToBytes;
 
 
 public class SerializationTest {

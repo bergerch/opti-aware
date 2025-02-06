@@ -36,9 +36,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import bftsmart.communication.SystemMessage;
 import bftsmart.consensus.messages.ConsensusMessage;
-import bftsmart.aware.messages.MonitoringMessage;
-import bftsmart.aware.monitoring.MessageLatencyMonitor;
-import bftsmart.aware.monitoring.Monitor;
+import bftsmart.optilog.messages.LatencyMonitoringMessage;
+import bftsmart.optilog.sensors.LatencySensor;
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.util.TOMUtil;
@@ -116,8 +116,8 @@ public class ServersCommunicationLayer extends Thread {
 	private String ssltlsProtocolVersion;
 
     // AWARE
-    public MessageLatencyMonitor writeLatenciesMonitor;
-    public MessageLatencyMonitor proposeLatenciesMonitor;
+    public LatencySensor writeLatenciesMonitor;
+    public LatencySensor proposeLatenciesMonitor;
 
     private long start_time;
 
@@ -132,8 +132,8 @@ public class ServersCommunicationLayer extends Thread {
         this.ssltlsProtocolVersion = controller.getStaticConf().getSSLTLSProtocolVersion();
 
         /** AWARE **/
-        this.writeLatenciesMonitor = Monitor.getInstance(controller).getWriteLatencyMonitor();
-        this.proposeLatenciesMonitor = Monitor.getInstance(controller).getProposeLatencyMonitor();
+        this.writeLatenciesMonitor = LatencyMonitor.getInstance(controller).getWriteLatencySensor();
+        this.proposeLatenciesMonitor = LatencyMonitor.getInstance(controller).getProposeLatencySensor();
         /** END AWARE **/
 
 
@@ -324,7 +324,7 @@ public class ServersCommunicationLayer extends Thread {
                 }
                 if (proposeLatenciesMonitor != null && (
                         (sm instanceof ConsensusMessage && ((ConsensusMessage) sm).getPaxosVerboseType().equals("PROPOSE")) ||
-                         sm instanceof MonitoringMessage && ((MonitoringMessage) sm).getPaxosVerboseType().equals("DUMMY_PROPOSE")))
+                         sm instanceof LatencyMonitoringMessage && ((LatencyMonitoringMessage) sm).getPaxosVerboseType().equals("DUMMY_PROPOSE")))
                 {
                     Long timestamp = System.nanoTime();
                     proposeLatenciesMonitor.addSentTime(target, ((ConsensusMessage) sm).getNumber(), timestamp, challenge);

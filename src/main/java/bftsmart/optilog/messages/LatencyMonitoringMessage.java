@@ -1,4 +1,4 @@
-package bftsmart.aware.messages;
+package bftsmart.optilog.messages;
 
 import bftsmart.consensus.messages.ConsensusMessage;
 
@@ -12,9 +12,9 @@ import java.io.ObjectOutput;
  *
  * @author cb
  */
-public class MonitoringMessage extends ConsensusMessage {
+public class LatencyMonitoringMessage extends ConsensusMessage {
 
-    public MonitoringMessage() {
+    public LatencyMonitoringMessage() {
     }
 
     /**
@@ -26,7 +26,7 @@ public class MonitoringMessage extends ConsensusMessage {
      * @param from      This should be this process ID
      * @param value     This should be null if its a COLLECT message, or the proposed value if it is a PROPOSE message
      */
-    public MonitoringMessage(int paxosType, int id, int epoch, int from, byte[] value) {
+    public LatencyMonitoringMessage(int paxosType, int id, int epoch, int from, byte[] value) {
         super(paxosType, id, epoch, from, value);
     }
 
@@ -40,7 +40,7 @@ public class MonitoringMessage extends ConsensusMessage {
      * @param value     This should be null if its a COLLECT message, or the proposed value if it is a PROPOSE message
      * @param challenge random number attached to the message for preventing ahead-of-time responses
      */
-    public MonitoringMessage(int paxosType, int id, int epoch, int from, int challenge, byte[] value) {
+    public LatencyMonitoringMessage(int paxosType, int id, int epoch, int from, int challenge, byte[] value) {
         super(paxosType, id, epoch, from, value);
         this.challenge = challenge;
     }
@@ -54,7 +54,7 @@ public class MonitoringMessage extends ConsensusMessage {
      * @param epoch Epoch timestamp
      * @param from  This should be this process ID
      */
-    public MonitoringMessage(int type, int id, int epoch, int from) {
+    public LatencyMonitoringMessage(int type, int id, int epoch, int from) {
 
         super(type, id, epoch, from, null);
 
@@ -82,20 +82,15 @@ public class MonitoringMessage extends ConsensusMessage {
     // Implemented method of the Externalizable interface
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-
         out.writeInt(challenge);
         super.writeExternal(out);
-
-
     }
 
     // Implemented method of the Externalizable interface
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-
         challenge = in.readInt();
         super.readExternal(in);
-
     }
 
 }

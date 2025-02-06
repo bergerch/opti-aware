@@ -18,13 +18,12 @@ package bftsmart.tom;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import bftsmart.communication.ServerCommunicationSystem;
 import bftsmart.aware.decisions.AwareController;
-import bftsmart.aware.monitoring.Monitor;
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.tom.core.ExecutionManager;
 import bftsmart.consensus.messages.MessageFactory;
 import bftsmart.consensus.roles.Acceptor;
@@ -48,7 +47,6 @@ import bftsmart.tom.server.defaultservices.DefaultReplier;
 import bftsmart.tom.util.KeyLoader;
 import bftsmart.tom.util.ShutdownHookThread;
 import bftsmart.tom.util.TOMUtil;
-import pod.MessageType;
 
 import java.security.Provider;
 
@@ -522,7 +520,7 @@ public class ServiceReplica {
 
         /** AWARE */
         if (SVController.getStaticConf().isUseDynamicWeights()) {
-            Monitor.getInstance(SVController);
+            LatencyMonitor.getInstance(SVController);
             AwareController.getInstance(SVController, executionManager);
         }
         /** End AWARE */

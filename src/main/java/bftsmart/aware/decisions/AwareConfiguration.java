@@ -1,6 +1,6 @@
 package bftsmart.aware.decisions;
 
-import bftsmart.aware.monitoring.Monitor;
+import bftsmart.optilog.monitors.LatencyMonitor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class AwareConfiguration implements Comparable<AwareConfiguration> {
     private int leader;
 
     // predicted latency for this configuration
-    private long predictedLatency = Monitor.MISSING_VALUE;
+    private long predictedLatency = LatencyMonitor.MISSING_VALUE;
 
     public AwareConfiguration(WeightConfiguration weightConfiguration, int leader, long predictedLatency) {
         this.weightConfiguration = weightConfiguration;
@@ -64,7 +64,7 @@ public class AwareConfiguration implements Comparable<AwareConfiguration> {
     @Override
     public String toString() {
         String result = weightConfiguration.toString() + " with leader " + leader + " ";
-        if (predictedLatency != Monitor.MISSING_VALUE)
+        if (predictedLatency != LatencyMonitor.MISSING_VALUE)
             result += "and latency of " + predictedLatency;
 
         return result;

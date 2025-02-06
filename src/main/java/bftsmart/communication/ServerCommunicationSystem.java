@@ -25,8 +25,8 @@ import bftsmart.communication.client.CommunicationSystemServerSideFactory;
 import bftsmart.communication.client.RequestReceiver;
 import bftsmart.communication.server.ServersCommunicationLayer;
 import bftsmart.consensus.roles.Acceptor;
-import bftsmart.aware.monitoring.MessageLatencyMonitor;
-import bftsmart.aware.monitoring.Monitor;
+import bftsmart.optilog.sensors.LatencySensor;
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.core.TOMLayer;
@@ -53,8 +53,8 @@ public class ServerCommunicationSystem extends Thread {
     private ServerViewController controller;
 
     /** AWARE **/
-    public MessageLatencyMonitor writeLatencyMonitor = null;
-    public MessageLatencyMonitor proposeLatencyMonitor = null;
+    public LatencySensor writeLatencyMonitor = null;
+    public LatencySensor proposeLatencyMonitor = null;
 
     /**
      * Creates a new instance of ServerCommunicationSystem
@@ -72,11 +72,11 @@ public class ServerCommunicationSystem extends Thread {
 
         /** AWARE **/
         if (controller.getStaticConf().isUseDynamicWeights())
-            writeLatencyMonitor = Monitor.getInstance(controller).getWriteLatencyMonitor();
+            writeLatencyMonitor = LatencyMonitor.getInstance(controller).getWriteLatencySensor();
 
         /** AWARE **/
         if (controller.getStaticConf().isUseDynamicWeights() && controller.getStaticConf().isUseDummyPropose())
-            proposeLatencyMonitor = Monitor.getInstance(controller).getProposeLatencyMonitor();
+            proposeLatencyMonitor = LatencyMonitor.getInstance(controller).getProposeLatencySensor();
 
 
 

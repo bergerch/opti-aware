@@ -1,4 +1,6 @@
-package bftsmart.aware.monitoring;
+package bftsmart.optilog;
+
+import bftsmart.optilog.monitors.LatencyMonitor;
 
 import java.io.*;
 
@@ -6,15 +8,15 @@ import java.io.*;
  * Measurements that represent latency vectors Li = <l0, l1, .. ln-1> that replicas will invoke with total order
  * then use for optimizations...
  */
-public class Measurements {
+public class LatencyMeasurement {
 
     public int n; // number of replicas
     public Long[] writeLatencies;
     public Long[] proposeLatencies;
 
-    public Measurements() { }
+    public LatencyMeasurement() { }
 
-    public Measurements(int n, Long[] writeLatencies, Long[] proposeLatencies) {
+    public LatencyMeasurement(int n, Long[] writeLatencies, Long[] proposeLatencies) {
         this.n = n;
         this.writeLatencies = writeLatencies;
         if (proposeLatencies != null) {
@@ -22,7 +24,7 @@ public class Measurements {
         } else {
             this.proposeLatencies = new Long[n];
             for (int i = 0; i < n; i++)
-                this.proposeLatencies[i] = Monitor.MISSING_VALUE;
+                this.proposeLatencies[i] = LatencyMonitor.MISSING_VALUE;
         }
     }
 
@@ -48,7 +50,7 @@ public class Measurements {
         return baos.toByteArray();
     }
 
-    public static Measurements fromBytes(byte[] measurements) {
+    public static LatencyMeasurement fromBytes(byte[] measurements) {
         int n = 0;
         Long[] writeLatencies = new Long[0];
         Long[] proposeLatencies = new Long[0];
@@ -71,7 +73,7 @@ public class Measurements {
             System.out.println("!!!!!!!!!!!!!!! Something went wrong " + e.getStackTrace());
         }
 
-        return new Measurements(n, writeLatencies, proposeLatencies);
+        return new LatencyMeasurement(n, writeLatencies, proposeLatencies);
     }
 
 

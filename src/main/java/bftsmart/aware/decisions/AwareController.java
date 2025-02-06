@@ -1,8 +1,6 @@
 package bftsmart.aware.decisions;
 
-import bftsmart.aware.monitoring.Monitor;
-import bftsmart.consensus.messages.ConsensusMessage;
-import bftsmart.consensus.messages.MessageFactory;
+import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.consensus.roles.Acceptor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.reconfiguration.views.View;
@@ -102,7 +100,7 @@ public class AwareController {
      */
     public AwareConfiguration computeBest(View v) {
         Simulator simulator = new Simulator(viewControl);
-        Monitor monitor = Monitor.getInstance(viewControl);
+        LatencyMonitor monitor = LatencyMonitor.getInstance(viewControl);
 
         int[] replicaSet = v.getProcesses();
         int n = v.getN();
@@ -336,7 +334,7 @@ public class AwareController {
                 logger.info("|AWARE|  [ ] Optimization: leader selection: no leader change," +
                         " current leader is the best leader");
             }
-            Monitor.getInstance(viewControl).init(svc.getCurrentViewN());
+            LatencyMonitor.getInstance(viewControl).init(svc.getCurrentViewN());
             /* End critical section */
             computationCompletedLock.unlock();
             logger.info("Optimization code completed");

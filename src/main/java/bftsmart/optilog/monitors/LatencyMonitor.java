@@ -1,7 +1,10 @@
-package bftsmart.aware.monitoring;
+package bftsmart.optilog.monitors;
 
 import bftsmart.consensus.Decision;
 import bftsmart.consensus.Epoch;
+import bftsmart.optilog.GlobalSynchronizer;
+import bftsmart.optilog.LatencyMeasurement;
+import bftsmart.optilog.sensors.LatencySensor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.core.messages.TOMMessage;
 import org.slf4j.Logger;
@@ -15,7 +18,7 @@ import java.util.TimerTask;
  *
  * @author cb
  */
-public class Monitor {
+public class LatencyMonitor {
 
     private static final int MONITORING_DELAY = 10 * 1000;
     private static final int MONITORING_PERIOD = 10 * 1000;
@@ -25,16 +28,16 @@ public class Monitor {
     // 10.000 seconds and will be used
 
     // Singelton
-    private static Monitor instance;
+    private static LatencyMonitor instance;
 
     private ServerViewController svc;
 
     // Stores and computes latency monitoring information
-    private MessageLatencyMonitor proposeLatencyMonitor;
-    private MessageLatencyMonitor writeLatencyMonitor;
+    private LatencySensor proposeLatencySensor;
+    private LatencySensor writeLatencySensor;
 
     // A timed synchronizer which will peridically disseminate monitoring, invokes them with total order
-    private MonitoringDataSynchronizer monitoringDataSynchronizer;
+    private GlobalSynchronizer monitoringDataSynchronizer;
 
     // The latencies the current process measures from its own perspective
     private Long[] freshestProposeLatencies;
@@ -49,7 +52,7 @@ public class Monitor {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-    private Monitor(ServerViewController svc) {
+    private LatencyMonitor(ServerViewController svc) {
 
         this.svc = svc;
 
@@ -57,8 +60,8 @@ public class Monitor {
         int n = svc.getCurrentViewN();
 
         // Initialize
-        this.writeLatencyMonitor = new MessageLatencyMonitor(svc);
-        this.proposeLatencyMonitor = new MessageLatencyMonitor(svc);
+        this.writeLatencySensor = new LatencySensor(svc);
+        this.proposeLatencySensor = new LatencySensor(svc);
 
         init(n);
 
@@ -69,8 +72,8 @@ public class Monitor {
             public void run() {
                 // Computes the most recent point-to-point latency using the last 1000 (monitoring window) measurements
                 // from consensus rounds
-                freshestWriteLatencies = writeLatencyMonitor.create_L("WRITE");
-                freshestProposeLatencies = proposeLatencyMonitor.create_L("PROPOSE");
+                freshestWriteLatencies = writeLatencySensor.create_L("WRITE");
+                freshestProposeLatencies = proposeLatencySensor.create_L("PROPOSE");
             }
         }, MONITORING_DELAY, MONITORING_PERIOD);
     }
@@ -81,31 +84,31 @@ public class Monitor {
      * @param svc server view controller
      * @return the monitoring instance
      */
-    public static Monitor getInstance(ServerViewController svc) {
-        if (Monitor.instance == null) {
-            Monitor.instance = new Monitor(svc);
+    public static LatencyMonitor getInstance(ServerViewController svc) {
+        if (LatencyMonitor.instance == null) {
+            LatencyMonitor.instance = new LatencyMonitor(svc);
         }
-        return Monitor.instance;
+        return LatencyMonitor.instance;
     }
 
     public void startSync() {
-        this.monitoringDataSynchronizer = new MonitoringDataSynchronizer(this.svc);
+        this.monitoringDataSynchronizer = new GlobalSynchronizer(this.svc);
     }
 
-    public MessageLatencyMonitor getWriteLatencyMonitor() {
-        return writeLatencyMonitor;
+    public LatencySensor getWriteLatencySensor() {
+        return writeLatencySensor;
     }
 
-    public MessageLatencyMonitor getProposeLatencyMonitor() {
-        return proposeLatencyMonitor;
+    public LatencySensor getProposeLatencySensor() {
+        return proposeLatencySensor;
     }
 
     public Long[] getFreshestProposeLatencies() {
-        return proposeLatencyMonitor.create_L("PROPOSE");
+        return proposeLatencySensor.create_L("PROPOSE");
     }
 
     public Long[] getFreshestWriteLatencies() {
-        return writeLatencyMonitor.create_L("WRITE");
+        return writeLatencySensor.create_L("WRITE");
     }
 
 
@@ -146,7 +149,7 @@ public class Monitor {
     private void onReceiveMonitoringInformation(int sender, byte[] value, int consensusID) {
         int n = svc.getCurrentViewN();
 
-        Measurements li = Measurements.fromBytes(value);
+        LatencyMeasurement li = LatencyMeasurement.fromBytes(value);
         m_write[sender] = li.writeLatencies;
         m_propose[sender] = li.proposeLatencies;
 

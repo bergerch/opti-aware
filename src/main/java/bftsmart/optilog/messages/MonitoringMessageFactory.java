@@ -1,4 +1,4 @@
-package bftsmart.aware.messages;
+package bftsmart.optilog.messages;
 
 
 /**
@@ -33,8 +33,8 @@ public class MonitoringMessageFactory {
      * @param value Proposed value
      * @return A monitoring message of the DUMMY_PROPOSE type, with the specified id, epoch, value, and proof
      */
-    public MonitoringMessage createDummyPropose(int id, int epoch, byte[] value) {
-        return new MonitoringMessage(DUMMY_PROPOSE, id, epoch, from, value);
+    public LatencyMonitoringMessage createDummyPropose(int id, int epoch, byte[] value) {
+        return new LatencyMonitoringMessage(DUMMY_PROPOSE, id, epoch, from, value);
     }
 
     /**
@@ -45,8 +45,8 @@ public class MonitoringMessageFactory {
      * @param value Proposed value
      * @return A monitoring message of the PROPOSE-RESPONSE type
      */
-    public MonitoringMessage createProposeResponse(int id, int epoch, byte[] value) {
-        return new MonitoringMessage(PROPOSE_RESPONSE, id, epoch, from, value);
+    public LatencyMonitoringMessage createProposeResponse(int id, int epoch, byte[] value) {
+        return new LatencyMonitoringMessage(PROPOSE_RESPONSE, id, epoch, from, value);
     }
 
     /**
@@ -58,8 +58,8 @@ public class MonitoringMessageFactory {
      * @param challenge random number attached to the message for preventing ahead-of-time responses
      * @return A monitoring message of the PROPOSE-RESPONSE type
      */
-    public MonitoringMessage createProposeResponse(int id, int epoch, int challenge, byte[] value) {
-        return new MonitoringMessage(PROPOSE_RESPONSE, id, epoch, from, challenge, value);
+    public LatencyMonitoringMessage createProposeResponse(int id, int epoch, int challenge, byte[] value) {
+        return new LatencyMonitoringMessage(PROPOSE_RESPONSE, id, epoch, from, challenge, value);
     }
 
     /**
@@ -70,8 +70,8 @@ public class MonitoringMessageFactory {
      * @param value Write value
      * @return A monitoring message of the WRITE_RESPONSE type
      */
-    public MonitoringMessage createWriteResponse(int id, int epoch, byte[] value) {
-        return new MonitoringMessage(WRITE_RESPONSE, id, epoch, from, value);
+    public LatencyMonitoringMessage createWriteResponse(int id, int epoch, byte[] value) {
+        return new LatencyMonitoringMessage(WRITE_RESPONSE, id, epoch, from, value);
     }
 
     /**
@@ -83,8 +83,8 @@ public class MonitoringMessageFactory {
      * @param challenge random number attached to the message for preventing ahead-of-time responses
      * @return A monitoring message of the WRITE_RESPONSE type
      */
-    public MonitoringMessage createWriteResponse(int id, int epoch, int challenge, byte[] value) {
-        return new MonitoringMessage(WRITE_RESPONSE, id, epoch, from, challenge, value);
+    public LatencyMonitoringMessage createWriteResponse(int id, int epoch, int challenge, byte[] value) {
+        return new LatencyMonitoringMessage(WRITE_RESPONSE, id, epoch, from, challenge, value);
     }
 
 }

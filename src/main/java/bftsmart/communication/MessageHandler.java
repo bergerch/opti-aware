@@ -17,9 +17,8 @@ package bftsmart.communication;
 
 import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.consensus.roles.Acceptor;
-import bftsmart.aware.messages.MonitoringMessage;
+import bftsmart.optilog.messages.LatencyMonitoringMessage;
 import bftsmart.statemanagement.SMMessage;
-import bftsmart.tests.recovery.ProcessExecutor;
 import bftsmart.tom.core.TOMLayer;
 import bftsmart.tom.core.messages.ForwardedMessage;
 import bftsmart.tom.core.messages.TOMMessage;
@@ -53,7 +52,7 @@ public class MessageHandler {
 
     @SuppressWarnings("unchecked")
     protected void processData(SystemMessage sm) {
-        if (sm instanceof ConsensusMessage && !(sm instanceof MonitoringMessage)) {
+        if (sm instanceof ConsensusMessage && !(sm instanceof LatencyMonitoringMessage)) {
 
             int myId = tomLayer.controller.getStaticConf().getProcessId();
 
@@ -156,33 +155,33 @@ public class MessageHandler {
                             break;
                     }
                     /**************       AWARE     **********************************/
-                } else if (sm instanceof MonitoringMessage) {
+                } else if (sm instanceof LatencyMonitoringMessage) {
 
-                    logger.debug(" <--| MM | Monitoring message received " + ((MonitoringMessage) sm).getPaxosVerboseType()
-                            + "from " + sm.sender + " WITH NUMBER " + ((MonitoringMessage) sm).getNumber());
+                    logger.debug(" <--| MM | Monitoring message received " + ((LatencyMonitoringMessage) sm).getPaxosVerboseType()
+                            + "from " + sm.sender + " WITH NUMBER " + ((LatencyMonitoringMessage) sm).getNumber());
 
-                    switch (((MonitoringMessage) sm).getPaxosVerboseType()) {
+                    switch (((LatencyMonitoringMessage) sm).getPaxosVerboseType()) {
                         case "DUMMY_PROPOSE":
                             // Send back PROPOSE_RESPONSE
                             if (tomLayer.controller.getStaticConf().isUseProposeResponse()) {
                                 logger.debug("I send PROPOSE_RESPONSE for consensus message " +
-                                        ((MonitoringMessage) sm).getNumber() + " to process " + sm.getSender());
+                                        ((LatencyMonitoringMessage) sm).getNumber() + " to process " + sm.getSender());
                                 int[] destination = new int[1];
-                                destination[0] = ((MonitoringMessage) sm).sender;
-                                MonitoringMessage proposeResponse = tomLayer.monitoringMsgFactory.createProposeResponse(
-                                        ((MonitoringMessage) sm).getNumber(), ((MonitoringMessage) sm).getEpoch(),
-                                        ((MonitoringMessage) sm).getValue());
-                                proposeResponse.setChallenge((((MonitoringMessage) sm).getChallenge()));
+                                destination[0] = ((LatencyMonitoringMessage) sm).sender;
+                                LatencyMonitoringMessage proposeResponse = tomLayer.monitoringMsgFactory.createProposeResponse(
+                                        ((LatencyMonitoringMessage) sm).getNumber(), ((LatencyMonitoringMessage) sm).getEpoch(),
+                                        ((LatencyMonitoringMessage) sm).getValue());
+                                proposeResponse.setChallenge((((LatencyMonitoringMessage) sm).getChallenge()));
                                 tomLayer.getCommunication().send(destination, proposeResponse);
                             }
                             break;
                         case "PROPOSE_RESPONSE":
                             tomLayer.getCommunication().proposeLatencyMonitor.addRecvdTime(sm.sender,
-                                    ((MonitoringMessage) sm).getNumber(), ((MonitoringMessage) sm).getChallenge());
+                                    ((LatencyMonitoringMessage) sm).getNumber(), ((LatencyMonitoringMessage) sm).getChallenge());
                             break;
                         case "WRITE_RESPONSE":
                             tomLayer.getCommunication().writeLatencyMonitor.addRecvdTime(sm.sender,
-                                    ((MonitoringMessage) sm).getNumber(), ((MonitoringMessage) sm).getChallenge());
+                                    ((LatencyMonitoringMessage) sm).getNumber(), ((LatencyMonitoringMessage) sm).getChallenge());
                             break;
                         default:
                             logger.error("Unknown Monitoring message type");
