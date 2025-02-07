@@ -126,7 +126,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
 
 
     /**
-     * AWARE
+     * OptiLog
      **/
     public MonitoringMessageFactory monitoringMsgFactory;
     //private ReentrantLock dummyProposeLock = new ReentrantLock();
@@ -218,7 +218,7 @@ public final class TOMLayer extends Thread implements RequestReceiver {
             }, 0, controller.getStaticConf().getBatchTimeout());
         }
 
-        // AWARE
+        // OptiLog
         monitoringMsgFactory = new MonitoringMessageFactory(this.controller.getStaticConf().getProcessId());
     }
 

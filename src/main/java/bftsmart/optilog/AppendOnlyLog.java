@@ -2,6 +2,7 @@ package bftsmart.optilog;
 
 import bftsmart.consensus.Decision;
 import bftsmart.optilog.monitors.LatencyMonitor;
+import bftsmart.optilog.monitors.SuspicionMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.core.messages.TOMMessage;
 import bftsmart.tom.core.messages.TOMMessageType;
@@ -28,25 +29,27 @@ public class AppendOnlyLog {
         svc = controller;
     }
 
-    public void record(Decision decision) {
+    public void commit(Decision decision) {
         for (TOMMessage tm : decision.getDeserializedValue()) {
             if (TOMMessageType.isMonitoringType(tm.getReqType())) {
-                APPEND_TO_LOG.trace("Consensus output monitoring message, " + tm.toString());
+                APPEND_TO_LOG.trace("Consensus outputs monitoring message, " + tm.toString());
                 switch (tm.getReqType()) {
                     case MEASUREMENT_LATENCY:
                         LatencyMonitor.getInstance(svc)
                                 .notify(tm.getSender(), tm.getContent(), decision.getConsensusId());
                         break;
                     case MEASUREMENT_SUSPICION:
-                        // TODO Implement later
+                        SuspicionMonitor.getInstance(svc)
+                                .notify(tm.getSender(), tm.getContent(), decision.getConsensusId());
                         break;
                     case MEASUREMENT_MISBEHAVIOR:
+                        APPEND_TO_LOG.error("MISBEHAVIOR MONITOR NOT IMPLEMENTED");
                         // Todo Implement later
                         break;
                 }
                 //onReceiveMonitoringInformation(tm.getSender(), tm.getContent(), decision.getConsensusId());
 
-            } else {
+            } else { // TOMMessage is type client command
                 APPEND_TO_LOG.trace("Consensus output client command ");
             }
         }

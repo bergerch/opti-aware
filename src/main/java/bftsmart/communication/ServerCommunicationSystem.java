@@ -25,8 +25,8 @@ import bftsmart.communication.client.CommunicationSystemServerSideFactory;
 import bftsmart.communication.client.RequestReceiver;
 import bftsmart.communication.server.ServersCommunicationLayer;
 import bftsmart.consensus.roles.Acceptor;
+import bftsmart.optilog.SensorApp;
 import bftsmart.optilog.sensors.LatencySensor;
-import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.core.TOMLayer;
@@ -52,7 +52,7 @@ public class ServerCommunicationSystem extends Thread {
     private CommunicationSystemServerSide clientsConn;
     private ServerViewController controller;
 
-    /** AWARE **/
+    /** OptiLog **/
     public LatencySensor writeLatencySensor = null;
     public LatencySensor proposeLatencySensor = null;
 
@@ -70,13 +70,13 @@ public class ServerCommunicationSystem extends Thread {
 
         serversConn = new ServersCommunicationLayer(controller, inQueue, replica);
 
-        /** AWARE **/
+        /** OptiLog **/
         if (controller.getStaticConf().isUseDynamicWeights())
-            writeLatencySensor = LatencyMonitor.getInstance(controller).getWriteLatencySensor();
+            writeLatencySensor = SensorApp.getInstance(controller).getWriteLatencySensor();
 
-        /** AWARE **/
+        /** OptiLog **/
         if (controller.getStaticConf().isUseDynamicWeights() && controller.getStaticConf().isUseDummyPropose())
-            proposeLatencySensor = LatencyMonitor.getInstance(controller).getProposeLatencySensor();
+            proposeLatencySensor =  SensorApp.getInstance(controller).getProposeLatencySensor();
 
 
 

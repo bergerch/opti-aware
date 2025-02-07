@@ -78,7 +78,7 @@ public class AwareController {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                logger.info("[AwARE] Controller of id=" + svc.getStaticConf().getProcessId()
+                logger.info("[OptiLog] Controller of id=" + svc.getStaticConf().getProcessId()
                         + ": currently using weights " + instance.getCurrent()
                         + ", leader " + executionManager.getCurrentLeader()
                         + ", view " + svc.getCurrentView().getId()
@@ -295,10 +295,10 @@ public class AwareController {
                 /** The system now uses the new view */
 
                 AwareController.getInstance(svc, executionManager).setCurrent(bestWeights);
-                logger.info("|AWARE|-" + cid + "-[X] Optimization: Weight adjustment, now using " + bestWeights);
+                logger.info("|OptiLog|-" + cid + "-[X] Optimization: Weight adjustment, now using " + bestWeights);
             } else {
                 // Keep the current configuration
-                logger.info("|AWARE|-" + cid + "-[ ] Optimization: Weight adjustment, no adjustment," +
+                logger.info("|OptiLog|-" + cid + "-[ ] Optimization: Weight adjustment, no adjustment," +
                         " current weight config is the best weight config");
             }
 
@@ -329,9 +329,9 @@ public class AwareController {
                     }
                 }
 
-                logger.info("|AWARE|  [X] Optimization: leader selection, new leader is? " + best.getLeader());
+                logger.info("|OptiLog|  [X] Optimization: leader selection, new leader is? " + best.getLeader());
             } else { // Keep the current configuration
-                logger.info("|AWARE|  [ ] Optimization: leader selection: no leader change," +
+                logger.info("|OptiLog|  [ ] Optimization: leader selection: no leader change," +
                         " current leader is the best leader");
             }
             LatencyMonitor.getInstance(viewControl).init(svc.getCurrentViewN());

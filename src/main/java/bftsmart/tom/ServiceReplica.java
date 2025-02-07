@@ -518,12 +518,12 @@ public class ServiceReplica {
         tomLayer.start(); // start the layer execution
         tomStackCreated = true;
 
-        /** AWARE */
+        /** OptiLog */
         if (SVController.getStaticConf().isUseDynamicWeights()) {
             LatencyMonitor.getInstance(SVController);
             AwareController.getInstance(SVController, executionManager);
         }
-        /** End AWARE */
+        /** End OptiLog */
     }
 
     /**

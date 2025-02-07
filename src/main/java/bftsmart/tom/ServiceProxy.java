@@ -17,10 +17,8 @@ package bftsmart.tom;
 
 import bftsmart.tom.core.TOMSender;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -187,11 +185,11 @@ public class ServiceProxy extends TOMSender {
 
 	/**
 	 * AWARE
-	 * @param monitoringInformation
+	 * @param metrics
 	 * @return
 	 */
-	public byte[] invokeOrderedMonitoring(byte[] monitoringInformation) {
-		return invoke(monitoringInformation, TOMMessageType.MONITORING);
+	public byte[] propose(byte[] metrics, TOMMessageType type) {
+		return invoke(metrics, type);
 	}
 
         /**
@@ -255,9 +253,12 @@ public class ServiceProxy extends TOMSender {
 			replyServer = -1;
 			hashResponseController = null;
 
-			boolean isMonitoringMessage = reqType == TOMMessageType.MONITORING; // AWARE
+			boolean isMonitoringMessage = (reqType == TOMMessageType.MONITORING
+							|| reqType == TOMMessageType.MEASUREMENT_LATENCY
+							|| reqType == TOMMessageType.MEASUREMENT_SUSPICION
+							|| reqType == TOMMessageType.MEASUREMENT_MISBEHAVIOR);
 
-		if(requestType == TOMMessageType.UNORDERED_HASHED_REQUEST){
+			if(requestType == TOMMessageType.UNORDERED_HASHED_REQUEST){
 
 				replyServer = getRandomlyServerId();
 				logger.debug("[" + this.getClass().getName() + "] replyServerId(" + replyServer + ") "

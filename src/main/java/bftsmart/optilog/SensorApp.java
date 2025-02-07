@@ -1,15 +1,15 @@
 package bftsmart.optilog;
 
-import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.optilog.sensors.LatencyMeasurement;
+import bftsmart.optilog.sensors.LatencySensor;
+import bftsmart.optilog.sensors.SuspicionSensor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceProxy;
+import bftsmart.tom.core.messages.TOMMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,55 +18,70 @@ import java.util.TimerTask;
  *
  * @author cb
  */
-public class GlobalSynchronizer {
+public class SensorApp {
 
-    private static GlobalSynchronizer instance;
+    private static SensorApp instance;
 
     private ServiceProxy consensusEngine;
+    private ServerViewController svc;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private List<Monitor> monitors = new ArrayList<>();
+    /***
+     * Sensors
+     **/
+    // Collects local latency monitoring information
+    private LatencySensor proposeLatencySensor;
+    private LatencySensor writeLatencySensor;
 
-    /**
-     * Creates a new Synchronizer to disseminate data with total order
-     *
-     * @param svc server view controller
-     */
-    public GlobalSynchronizer(ServerViewController svc) {
+    // Collects local suspicion information
+    private SuspicionSensor suspicionSensor;
 
+    private SensorApp(ServerViewController svc) {
+
+        // Init the gateway to the consensus engine:
         int myID = svc.getStaticConf().getProcessId();
         consensusEngine = new ServiceProxy(myID);
+        this.svc = svc;
 
-        // Create a time to periodically broadcast this replica's measurements to all replicas
+        // Init all of the sensors to collect data from:
+        proposeLatencySensor = new LatencySensor(svc);
+        writeLatencySensor = new LatencySensor(svc);
+    }
+
+    public static SensorApp getInstance(ServerViewController svc) {
+        if (SensorApp.instance == null) {
+            SensorApp.instance = new SensorApp(svc);
+        }
+        return SensorApp.instance;
+    }
+
+    public void start() {
+        // Create a time tor periodically disseminate this replica's latency measurements to all replicas
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
 
-                // Get freshest write latenciesfrom Monitor
-                Long[] writeLatencies = LatencyMonitor.getInstance(svc).getFreshestWriteLatencies();
-                Long[] proposeLatencies = LatencyMonitor.getInstance(svc).getFreshestProposeLatencies();
+                // Get freshest write latencies from Monitor
+                Long[] writeLatencies = writeLatencySensor.create_L("WRITE");
+                Long[] proposeLatencies = proposeLatencySensor.create_L("PROPOSE");
 
                 LatencyMeasurement li = new LatencyMeasurement(svc.getCurrentViewN(), writeLatencies, proposeLatencies);
                 byte[] data = li.toBytes();
 
-                consensusEngine.invokeOrderedMonitoring(data);
-
+                consensusEngine.propose(data, TOMMessageType.MEASUREMENT_LATENCY);
                 logger.debug("|---> Disseminating monitoring information with total order! ");
             }
         }, svc.getStaticConf().getSynchronisationDelay(), svc.getStaticConf().getSynchronisationPeriod());
     }
 
-    public GlobalSynchronizer getInstance(ServerViewController svc) {
-        if (GlobalSynchronizer.instance == null) {
-            GlobalSynchronizer.instance = new GlobalSynchronizer(svc);
-        }
-        return GlobalSynchronizer.instance;
+    public synchronized LatencySensor getWriteLatencySensor() {
+        return writeLatencySensor;
     }
 
-    public void attachMonitor(Monitor monitor) {
-        monitors.add(monitor);
+    public synchronized LatencySensor getProposeLatencySensor() {
+        return proposeLatencySensor;
     }
 
     /**

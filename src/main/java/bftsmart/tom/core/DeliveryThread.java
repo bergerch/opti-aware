@@ -18,6 +18,7 @@ package bftsmart.tom.core;
 import bftsmart.aware.decisions.AwareController;
 import bftsmart.consensus.Decision;
 import bftsmart.optilog.AppendOnlyLog;
+import bftsmart.optilog.SensorApp;
 import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.statemanagement.ApplicationState;
@@ -244,10 +245,14 @@ public final class DeliveryThread extends Thread {
 									+ "\n\t\t    Ready to process operations    "
 									+ "\n\t\t###################################");
                     init = false;
-					/** AWARE **/
-					if (controller.getStaticConf().isUseDynamicWeights())
-						LatencyMonitor.getInstance(controller).startSync();
-					/** End AWARE **/
+					/** OptiLog **/
+					if (controller != null) {
+						SensorApp.getInstance(controller).start();
+					}
+					else {
+						logger.error("SeverViewController is null! Exiting");
+					}
+					/** End OptiLog **/
                 }
             }
             try {
@@ -305,7 +310,7 @@ public final class DeliveryThread extends Thread {
 						/**
 						 *  OptiLog
 						 */
-						AppendOnlyLog.getInstance(controller).record(d);
+						AppendOnlyLog.getInstance(controller).commit(d);
 						AwareController.getInstance(controller, tomLayer.execManager).optimize(d.getConsensusId());
 					}
 
