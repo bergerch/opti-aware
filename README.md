@@ -147,18 +147,6 @@ Once all replicas are ready, the client can be launched as follows:
 
 **Important tip #7:** Always make sure that each client uses a unique ID. Otherwise, clients may not be able to complete their operations.
 
-## Step 9 (optional): Testing/Evaluation of Client-side Speculation
-
-To evaluate the behavior of client-side speculation, the `Correctable` Interface must be used. For this purpose, we provide a separate client implementation `ThroughputLatencyClientICG`. See:  
-
-
-```
-bftsmart.benchmark.ThroughputLatencyServer
-```
-```
-bftsmart.benchmark.ThroughputLatencyClientICG
-```
-
 Note that these `bftsmart.benchmark` implementations should also automatically store the results to the file system.
 
 **Important tip #8:** For parsing latency results from all clients from the different regions you may want to use a script after collecting the results. It may look similar to this:
@@ -166,7 +154,7 @@ Note that these `bftsmart.benchmark` implementations should also automatically s
 cat bftSmartClient{0..20}/bftSmartClient*.java.*.stdout | grep "Average time for 1000 executions (-10%)" | sed 's/Average time for 1000 executions (-10%) = / /g' | sed 's/ \/\/  /, /g' | sed 's/us/ /g' > latencies.csv
 ```
 
-## Step 10 (optional): Reproduce Results from the Paper
+## Step 9 (optional): Reproduce Results from the Paper
 
 Evaluation results depend on the speed of communication links in the WAN. 
 Interestingly, we observed that links may become faster (to some extent) over large time intervals (years) because large cloud providers like Amazon AWS improve their infrastructure. For this purpose we provide latency data that allow an interested person to mimic the network characteristics we used by relying on high-fidelity network emulation/simulation tools like [Kollaps](https://github.com/miguelammatos/Kollaps) and [Shadow](https://github.com/shadow/shadow). 
