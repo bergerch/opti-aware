@@ -39,9 +39,11 @@ public class SensorApp {
 
     private SensorApp(ServerViewController svc) {
 
-        // Init the gateway to the consensus engine:
-        int myID = svc.getStaticConf().getProcessId();
-        consensusEngine = new ServiceProxy(myID);
+        if (svc == null){
+            logger.error("Server view controller is null. This should never happen here!");
+            System.exit(-1);
+        }
+
         this.svc = svc;
 
         // Init all of the sensors to collect data from:
@@ -58,6 +60,14 @@ public class SensorApp {
 
     public void start() {
         // Create a time tor periodically disseminate this replica's latency measurements to all replicas
+
+        if (consensusEngine == null) {
+            logger.info("OptiLog >> SensorApp: Connecting SensorApp to Consensus Engine");
+            // Init the gateway to the consensus engine:
+            int myID = svc.getStaticConf().getProcessId();
+            consensusEngine = new ServiceProxy(myID);
+        }
+
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -70,8 +80,8 @@ public class SensorApp {
                 LatencyMeasurement li = new LatencyMeasurement(svc.getCurrentViewN(), writeLatencies, proposeLatencies);
                 byte[] data = li.toBytes();
 
+                logger.info("OptiLog >> SensorApp: Disseminating monitoring information with total order! ");
                 consensusEngine.propose(data, TOMMessageType.MEASUREMENT_LATENCY);
-                logger.debug("|---> Disseminating monitoring information with total order! ");
             }
         }, svc.getStaticConf().getSynchronisationDelay(), svc.getStaticConf().getSynchronisationPeriod());
     }

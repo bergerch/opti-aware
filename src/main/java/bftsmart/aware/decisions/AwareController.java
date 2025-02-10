@@ -75,15 +75,18 @@ public class AwareController {
         // Debug
         // Periodically outputs current configuration
         Timer timer = new Timer();
+        final int[] cid = {0};
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                logger.info("[OptiLog] Controller of id=" + svc.getStaticConf().getProcessId()
-                        + ": currently using weights " + instance.getCurrent()
-                        + ", leader " + executionManager.getCurrentLeader()
-                        + ", view " + svc.getCurrentView().getId()
-                        + ", last executed consensus " + executionManager.getLastExec()
-                        + ", current Delta " + viewControl.getCurrentView().getDelta());
+                if (executionManager.getLastExec() - cid[0] >= 100) {
+                    logger.info("[OptiLog] Controller of id=" + svc.getStaticConf().getProcessId()
+                            + ": currently using weights " + instance.getCurrent()
+                            + ", leader " + executionManager.getCurrentLeader()
+                            + ", view " + svc.getCurrentView().getId()
+                            + ", last executed consensus " + executionManager.getLastExec());
+                    cid[0] = executionManager.getLastExec();
+                }
             }
         }, 10 * 1000, 5 * 1000);
     }

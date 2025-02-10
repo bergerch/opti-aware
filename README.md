@@ -1,52 +1,26 @@
-Mercury 0.3
+Opti-AWARE 0.3
 ----------
 
-Fast Wide-Area Byzantine Replication with Mercury
-
-This branch contains the source code for Mercury, an extension of AWARE and WHEAT/BFT-SMaRt.
-Mercury autonomously optimizes the latency of quorum-based BFT consensus. For this purpose, it employs a dual resilience threshold that enables faster transaction ordering when the system contains few faulty replicas. Mercury allows forming compact quorums that substantially accelerate consensus using a smaller resilience threshold. Nevertheless, Mercury upholds standard SMR safety and liveness guarantees with optimal resilience, thanks to its judicious use of a dual operation mode and BFT forensics techniques. Our experiments spread tens of replicas across continents and reveal that Mercury can order transactions with finality in less than 0.4 seconds, half the time of a PBFT-like protocol (optimal in terms of number of communication steps and resilience) in the same network.
-
-
-
-<p align="center">
-    <img src="img/Mercury.svg" width="600"/>
-</p>
-
-A **technical description** of Mercury can be found in the **MIDDLEWARE'24** paper:
-
-[Chasing Lightspeed Consensus:
-Fast Wide-Area Byzantine Replication with Mercury](https://arxiv.org/abs/2305.15000)
-
-
-This branch contains the sources of Mercury, which integrates BFT forensic support and can switch between two modes of execution. It also incorporates Byzantine Correctables to allow for client-side speculation.
-
-
+This branch contains the source code for Opti-AWARE, an extension of AWARE and WHEAT/BFT-SMaRt.
 
 *Important:
-For evaluation purpose, we suggest to deploy Mercury in a wide-area network (WAN).*
+For evaluation purpose, we suggest to deploy Opti-AWARE in a wide-area network (WAN).*
 In the following, we provide a description of how to (1) build, (2) configure, and (3) run this software.
-
 
 ----------
 
 
 ## Step 1: Check for Updates
 
-Check if the version you pulled from an online repo includes all recent changes form the most stable `main` branch from the [GitHub repository](https://github.com/bergerch/Mercury). It's best to directly clone from the GitHub Repo we will maintain:
+Check if the version you pulled from an online repo includes all recent changes form the most stable `main` branch from the [GitHub repository](https://github.com/bergerch/aware). It's best to directly clone from the GitHub Repo we will maintain:
 
 
 ```
-git clone git@github.com:bergerch/Mercury.git
-```
-
-If you cloned this repository from a different source (i.e., the ACM repo) then add a remote and run this command to pull the most recent updates (in Mercury directoy):
-
-```
-git remote add mercury https://github.com/bergerch/Mercury
+git clone git@github.com:bergerch/aware.git
 ```
 
 ```
-git pull mercury main
+git checkout opt-aware
 ```
 
 Now you should have the most recent changes. Next step is to build the software.
@@ -84,7 +58,7 @@ The required jar files and default configuration files will be available in the 
 
 ## Step 4: Defining a System Configuration
 
-To run any demonstration you first need to configure Mercury/BFT-SMaRt to define the protocol behavior and the location of each replica.
+To run any demonstration you first need to configure Opti-AWARE/BFT-SMaRt to define the protocol behavior and the location of each replica.
 
 The servers must be specified in the configuration file (see `config/hosts.config`):
 
@@ -101,7 +75,7 @@ The servers must be specified in the configuration file (see `config/hosts.confi
 
 **Important tip #1:** Always provide IP addresses instead of hostnames. If a machine running a replica is not correctly configured, BFT-SMaRt may fail to bind to the appropriate IP address and use the loopback address instead (127.0.0.1). This phenomenom may prevent clients and/or replicas from successfully establishing a connection among them.
 
-**Important tip #2:** You may want to specify at least **n=7** replicas, so that **f=2**. This is a recommended deployment configuration to observe the switching behavior of Mercury.
+**Important tip #2:** You may want to specify at least **n=4** replicas.
 
 
 The system configurations also have to be specified (see `config/system.config`). A working configuration file is included but to understand the parameters we refer the interested reader to the paper.
@@ -217,7 +191,6 @@ If you are interested in learning more about BFT-SMaRt, you can read:
 - The tool description published in [DSN'14](http://www.di.fc.ul.pt/~bessani/publications/dsn14-bftsmart.pdf):
 - WHEAT is published in [SRDS'15](https://doi.org/10.1109/SRDS.2015.40)
 - AWARE is published in [TDSC'20](https://doi.org/10.1109/TDSC.2020.3030605)
-- Mercury is published in [Middleware'24](https://arxiv.org/abs/2305.15000)
 
 ***Feel free to contact us if you have any questions!***
 

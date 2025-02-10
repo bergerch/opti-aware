@@ -74,7 +74,6 @@ public class LatencySensor {
     public synchronized void addSentTime(int replicaID, int monitoringInstanceID, Long timestamp, int challenge) {
         this.addSentTime(replicaID, monitoringInstanceID, timestamp);
 
-        // Todo only in BFT:
         this.sentMsgChallenges.put(monitoringInstanceID % window, challenge);
     }
 
@@ -139,6 +138,8 @@ public class LatencySensor {
                     long latency = (rcvd - sent) / 2; // one-way latency as half of round trip time
                     // logger.info("Latency computed " + (double) Math.round((double) latency / 1000) / 1000.00 + " ms");
                     latencies.add(latency);
+                } else {
+                    logger.debug("OptiLog >> LatencySensor: Only SENT but no received Timestamp");
                 }
             }
             latencies.sort(Comparator.naturalOrder());
@@ -153,6 +154,8 @@ public class LatencySensor {
 
         long end = System.nanoTime();
         logger.debug("Computed median latencies for " + description + "  in " + (double) (end - start) / 1000000.00 + " ms");
+
+        // printLatencyVector(latenciesToMillis(latency_vector), description);
         return latency_vector;
     }
 
@@ -177,23 +180,23 @@ public class LatencySensor {
         return latencies;
     }
 
-    public static void printLatencyVector(double[] m) {
-        String result = "\n";
-        result += (".....................Measured latencies .......................\n");
-        result += ("    0       1       2        3        4        ....    \n");
-        result += ("...............................................................\n");
+    public static void printLatencyVector(double[] m, String description) {
+        StringBuilder result = new StringBuilder("\n");
+        result.append("...................OptiLog >> LatencySensor: for LatencySensor Type: " + description + " .......................\n");
+        result.append("    0       1       2        3        4        ....    \n");
+        result.append("...............................................................\n");
         for (double d : m) {
             if (d >= 0 && d < LatencyMonitor.MISSING_VALUE) {
-                result = result + "  " + d + "  ";
+                result.append("  ").append(d).append("  ");
             } else {
-                result += "silent";
+                result.append("silent");
             }
         }
-        result += "\n";
-        result += ("...............................................................\n");
-        result += "\n";
+        result.append("\n");
+        result.append("...............................................................\n");
+        result.append("\n");
         final Logger logger = LoggerFactory.getLogger("bftsmart.optilog.monitoring.MessageLatencyMonitor");
-        logger.info(result);
+        logger.info(result.toString());
     }
 
 }

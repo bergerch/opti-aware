@@ -237,7 +237,6 @@ public final class DeliveryThread extends Thread {
 			while (tomLayer.isRetrievingState()) {
 				logger.info("Retrieving State");
 				canDeliver.awaitUninterruptibly();
-
 				// if (tomLayer.getLastExec() == -1)
 				if (init) {
 					logger.info(

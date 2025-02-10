@@ -274,7 +274,7 @@ public class ServiceProxy extends TOMSender {
 				TOMulticast(sm);
 			} else {
 				if (isMonitoringMessage){
-					TOMulticast(request, reqId, operationId, TOMMessageType.ORDERED_REQUEST, true);
+					TOMulticast(request, reqId, operationId, TOMMessageType.ORDERED_REQUEST, reqType.toInt());
 					return null;  // just disseminate data, do not expect response
 			} else {
 				TOMulticast(request, reqId, operationId, reqType);

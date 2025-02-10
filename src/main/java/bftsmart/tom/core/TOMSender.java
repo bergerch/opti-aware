@@ -138,9 +138,9 @@ public abstract class TOMSender implements ReplyReceiver, Closeable, AutoCloseab
 	 * @param reqType
 	 * @param isMonitoringMessage
 	 */
-	public void TOMulticast(byte[] m, int reqId, int operationId, TOMMessageType reqType, boolean isMonitoringMessage) {
+	public void TOMulticast(byte[] m, int reqId, int operationId, TOMMessageType reqType, int monitoringMessageType) {
 		TOMMessage message = new TOMMessage(me, session, reqId, operationId, m, viewController.getCurrentViewId(), reqType);
-		message.setIsMonitoringMessage(isMonitoringMessage);
+		message.setIsMonitoringMessage(monitoringMessageType);
 		this.TOMulticast(message);
 	}
 

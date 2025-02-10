@@ -43,10 +43,10 @@ public enum TOMMessageType {
             case ASK_STATUS: return 4;
             case STATUS_REPLY: return 5;
             case UNORDERED_HASHED_REQUEST: return 6;
-            case MONITORING: return 8;
-            case MEASUREMENT_LATENCY: return 9;
-            case MEASUREMENT_SUSPICION: return 10;
-            case MEASUREMENT_MISBEHAVIOR: return 11;
+            case MONITORING: return 7;
+            case MEASUREMENT_LATENCY: return 8;
+            case MEASUREMENT_SUSPICION: return 9;
+            case MEASUREMENT_MISBEHAVIOR: return 10;
 
             default: return -1;
         }
@@ -61,15 +61,15 @@ public enum TOMMessageType {
             case 4: return ASK_STATUS;
             case 5: return STATUS_REPLY;
             case 6: return UNORDERED_HASHED_REQUEST;
-            case 8: return MONITORING;
-            case 9: return MEASUREMENT_LATENCY;
-            case 10: return MEASUREMENT_SUSPICION;
-            case 11: return MEASUREMENT_MISBEHAVIOR;
+            case 7: return MONITORING;
+            case 8: return MEASUREMENT_LATENCY;
+            case 9: return MEASUREMENT_SUSPICION;
+            case 10: return MEASUREMENT_MISBEHAVIOR;
             default: return RECONFIG;
         }            
     }
 
     public static boolean isMonitoringType(TOMMessageType type) {
-        return type.toInt() > 7 &&  type.toInt() < 12;
+        return type.toInt() >= 7 &&  type.toInt() <= 10;
     }
 }

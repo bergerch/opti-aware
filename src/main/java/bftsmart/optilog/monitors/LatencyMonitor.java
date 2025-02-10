@@ -91,6 +91,8 @@ public class LatencyMonitor implements Monitor {
 
         m_write[sender] = li.writeLatencies;
         m_propose[sender] = li.proposeLatencies;
+
+        // printM("Updated", m_write, consensusID, n); // Todo outcomment later
     }
 
     /**

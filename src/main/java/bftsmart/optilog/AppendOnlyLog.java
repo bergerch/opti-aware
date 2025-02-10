@@ -30,11 +30,13 @@ public class AppendOnlyLog {
     }
 
     public void commit(Decision decision) {
+        APPEND_TO_LOG.info("OptiLog >> AppendOnlyLog: Append to log: decision:" + decision.getConsensusId());
         for (TOMMessage tm : decision.getDeserializedValue()) {
-            if (TOMMessageType.isMonitoringType(tm.getReqType())) {
+            if (tm.getIsMonitoringMessage()) {
                 APPEND_TO_LOG.trace("Consensus outputs monitoring message, " + tm.toString());
-                switch (tm.getReqType()) {
+                switch (TOMMessageType.fromInt(tm.getIsMonitoringType())) {
                     case MEASUREMENT_LATENCY:
+                        //APPEND_TO_LOG.info("Received from consensus: LATENCY monitoring message from " + tm.getSender()); // Todo outcomment later
                         LatencyMonitor.getInstance(svc)
                                 .notify(tm.getSender(), tm.getContent(), decision.getConsensusId());
                         break;
@@ -50,9 +52,10 @@ public class AppendOnlyLog {
                 //onReceiveMonitoringInformation(tm.getSender(), tm.getContent(), decision.getConsensusId());
 
             } else { // TOMMessage is type client command
-                APPEND_TO_LOG.trace("Consensus output client command ");
+                APPEND_TO_LOG.trace("Consensus output client command " + tm.getReqType().toInt());
             }
         }
+
     }
 
 }

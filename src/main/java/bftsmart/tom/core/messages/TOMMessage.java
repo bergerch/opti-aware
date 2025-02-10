@@ -46,7 +46,7 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 
 
 	/**AWARE **/
-	private boolean isMonitoringMessage = false; // If this message is for disseminating monitoring information
+	private int isMonitoringMessage = 0; // If this message is for disseminating monitoring information
 
 	private byte[] content = null; // Content of the message
 
@@ -240,7 +240,7 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 		out.writeInt(replyServer);
 
 		/** AWARE **/
-		out.writeBoolean(isMonitoringMessage);
+		out.writeInt(isMonitoringMessage);
 		/** End AWARE **/
 		
 		if (content == null) {
@@ -261,7 +261,7 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 		replyServer = in.readInt();
 
 		/** AWARE **/
-		isMonitoringMessage = in.readBoolean();
+		isMonitoringMessage = in.readInt();
 		/** End AWARE **/
 		
 		int toRead = in.readInt();
@@ -408,12 +408,16 @@ public class TOMMessage extends SystemMessage implements Externalizable, Compara
 	/*** AWARE */
 
 	public boolean getIsMonitoringMessage() {
-	 	return isMonitoringMessage;
+	 	return TOMMessageType.isMonitoringType(TOMMessageType.fromInt(isMonitoringMessage));
 	}
 
 
-	public void setIsMonitoringMessage(boolean isMonitoringMessage) {
+	public void setIsMonitoringMessage(int isMonitoringMessage) {
 	 	this.isMonitoringMessage = isMonitoringMessage;
+	}
+
+	public int getIsMonitoringType() {
+		return isMonitoringMessage;
 	}
 
 	/** End AWARE */
