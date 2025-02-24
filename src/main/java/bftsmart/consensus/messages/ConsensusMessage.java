@@ -18,7 +18,7 @@ package bftsmart.consensus.messages;
 import java.io.*;
 
 import bftsmart.communication.SystemMessage;
-
+import bftsmart.optilog.PrecisionClock.PTPClock;
 
 
 /**
@@ -33,6 +33,8 @@ public class ConsensusMessage extends SystemMessage {
     private Object proof; // Proof used when message type is COLLECT
                               // Can be either a MAC vector or a signature
 
+    // OptiLog: Append a timestamp to some consensus messages to monitor latency
+    private long sentTimestamp = 0L;
 
     /** AWARE **/
     protected int challenge = -1; // only necessary for BFT
@@ -78,6 +80,9 @@ public class ConsensusMessage extends SystemMessage {
 
     }
 
+    public void timestamp() {
+        sentTimestamp = PTPClock.precisionTimestamp();
+    }
 
     // Implemented method of the Externalizable interface
     @Override
@@ -89,7 +94,9 @@ public class ConsensusMessage extends SystemMessage {
         out.writeInt(epoch);
         out.writeInt(paxosType);
 
-
+        /** OptiLog **/
+        out.writeLong(sentTimestamp);
+        /** End OptiLog **/
         /*** AWARE **/
         out.writeInt(challenge);
         /*** End AWARE **/
@@ -126,7 +133,9 @@ public class ConsensusMessage extends SystemMessage {
         epoch = in.readInt();
         paxosType = in.readInt();
 
-
+        /** OptiLog **/
+        sentTimestamp = in.readLong();
+        /** End OptiLog **/
         /** AWARE **/
         challenge = in.readInt();
         /*** End AWARE **/
@@ -249,6 +258,9 @@ public class ConsensusMessage extends SystemMessage {
         paxosType = in.readInt();
 
 
+        /** OptiLog **/
+        sentTimestamp = in.readLong();
+        /** End OptiLog **/
         /*** AWARE **/
         challenge = in.readInt();
 
@@ -282,6 +294,9 @@ public class ConsensusMessage extends SystemMessage {
         out.writeInt(paxosType);
 
 
+        /** OptiLog **/
+        out.writeLong(sentTimestamp);
+        /** End OptiLog **/
         /*** AWARE **/
         out.writeInt(challenge);
 
@@ -306,6 +321,10 @@ public class ConsensusMessage extends SystemMessage {
             out.writeBoolean(false);
         }
 
+    }
+
+    public long getSentTimestamp() {
+        return sentTimestamp;
     }
 
     public void setValue(byte[] new_value) {

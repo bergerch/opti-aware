@@ -15,6 +15,7 @@ limitations under the License.
  */
 package bftsmart.communication.client.netty;
 
+import bftsmart.optilog.PrecisionClock.PTPClock;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -64,7 +65,7 @@ import bftsmart.tom.util.TOMUtil;
 public class NettyClientServerCommunicationSystemServerSide extends SimpleChannelInboundHandler<TOMMessage>
 		implements CommunicationSystemServerSide {
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private RequestReceiver requestReceiver;
 	private ConcurrentHashMap<Integer, NettyClientServerSession> sessionReplicaToClient;
@@ -164,8 +165,9 @@ public class NettyClientServerCommunicationSystemServerSide extends SimpleChanne
 			// ******* EDUARDO END **************//
 
 
+			PTPClock.checkTimeProtocol();
+			logger.info("Opti-AWARE Build 24. Feb 2025| Extensions: ");
 
-			logger.info("Opti-AWARE Build 5. Feb 2025| Extensions: ");
 			logger.info("WHEAT Extensions [on/off]: " + (controller.getStaticConf().isUseWeights()?"on":"off"));
 			logger.info("AWARE Extensions [on/off]: " + (controller.getStaticConf().isUseDynamicWeights()?"on":"off"));
 
