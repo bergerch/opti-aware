@@ -22,12 +22,7 @@ import java.util.StringTokenizer;
 
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class TOMConfiguration extends Configuration {
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected int n;
     protected int f;
@@ -97,6 +92,9 @@ public class TOMConfiguration extends Configuration {
     private int synchronisationPeriod;
     private int synchronisationDelay;
 
+    // OptiLog
+    private double suspicionDelta;
+
 
     /** Creates a new instance of TOMConfiguration */
     public TOMConfiguration(int processId, KeyLoader loader) {
@@ -112,8 +110,18 @@ public class TOMConfiguration extends Configuration {
     protected void init() {
         super.init();
         try {
-            n = Integer.parseInt(configs.remove("system.servers.num").toString());
-            String s = (String) configs.remove("system.servers.f");
+            if (configs == null) {
+                System.out.println("configs is Null");
+            }
+            String s = (String) configs.remove("system.servers.num");
+            if (s != null)
+            {
+                n = Integer.parseInt(s);
+            } else {
+                System.out.println("System n-parameter not specified!");
+                System.exit(-1);
+            }
+            s = (String) configs.remove("system.servers.f");
             if (s == null) {
                 f = (int) Math.ceil((n - 1) / 3);
             } else {
@@ -416,10 +424,10 @@ public class TOMConfiguration extends Configuration {
             monitoringWindow = s != null ? Integer.parseInt(s) : 0;
 
             s = (String) configs.remove("system.aware.useDynamicWeights");
-            useDynamicWeights = Boolean.parseBoolean(s);
+            useDynamicWeights =  s != null ? Boolean.parseBoolean(s) : false;
 
             s = (String) configs.remove("system.aware.useLeaderSelection");
-            useLeaderSelection = Boolean.parseBoolean(s);
+            useLeaderSelection = s != null ? Boolean.parseBoolean(s) : true;
 
             s = (String) configs.remove("system.aware.calculationInterval");
             calculationInterval = s != null ? Integer.parseInt(s) : 0;
@@ -434,19 +442,22 @@ public class TOMConfiguration extends Configuration {
             optimizationGoal = s != null ? Double.parseDouble(s) : 1.05;
 
             s = (String) configs.remove("system.aware.useDummyPropose");
-            useDummyPropose = Boolean.parseBoolean(s);
+            useDummyPropose = s != null ? Boolean.parseBoolean(s) : false;
 
             s = (String) configs.remove("system.aware.useProposeResponse");
-            useProposeResponse = Boolean.parseBoolean(s);
+            useProposeResponse = s != null ? Boolean.parseBoolean(s) : false;
 
             s = (String) configs.remove("system.aware.useWriteResponse");
-            useWriteResponse = Boolean.parseBoolean(s);
+            useWriteResponse =  s != null ? Boolean.parseBoolean(s) : true;
 
             s = (String) configs.remove("system.aware.synchronisationPeriod");
             synchronisationPeriod = s != null ? Integer.parseInt(s) : 20000;
 
             s = (String) configs.remove("system.aware.synchronisationDelay");
             synchronisationDelay = s != null ? Integer.parseInt(s) : 120000;
+
+            s = (String) configs.remove("system.optilog.suspicionDelta");
+            suspicionDelta = s != null ? Double.parseDouble(s) : 1.2;
 
             /**
              * Tulio Ribeiro
@@ -503,7 +514,7 @@ public class TOMConfiguration extends Configuration {
             }
 
         } catch (Exception e) {
-            logger.error("Could not parse system configuration file", e);
+            System.out.println("Could not parse system configuration file" + e);
         }
 
     }
@@ -794,6 +805,10 @@ public class TOMConfiguration extends Configuration {
 
     public void setSynchronisationDelay(int synchronisationDelay) {
         this.synchronisationDelay = synchronisationDelay;
+    }
+
+    public double getSuspicionDelta() {
+        return suspicionDelta;
     }
 
 }

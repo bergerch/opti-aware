@@ -1,5 +1,6 @@
 package bftsmart.aware.decisions;
 
+import bftsmart.optilog.SensorApp;
 import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.consensus.roles.Acceptor;
 import bftsmart.reconfiguration.ServerViewController;
@@ -91,6 +92,43 @@ public class AwareController {
         }, 10 * 1000, 5 * 1000);
     }
 
+    public void computeConsensusLatencyExpectation(View v) {
+
+        Simulator simulator = new Simulator(viewControl);
+        LatencyMonitor monitor = LatencyMonitor.getInstance(viewControl);
+
+        int[] replicaSet = v.getProcesses();
+        int n = v.getN();
+        int f = v.getF();
+        int u = v.isBFT() ? 2 * f : f;
+        int delta = v.getDelta();
+
+        // init matrices
+        long[][] propose = new long[n][n];
+        long[][] write = new long[n][n];
+        Long[][] propose_ast = monitor.sanitize(monitor.getM_propose());
+        Long[][] write_ast = monitor.sanitize(monitor.getM_write());
+
+        // Long to long
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                propose[i][j] = propose_ast[i][j];
+                write[i][j] = write_ast[i][j];
+            }
+        }
+        if (!instance.svc.getStaticConf().isUseDummyPropose()) {
+            propose = write;
+        }
+
+        int cid = executionManager.getTOMLayer().getLastExec();
+        WeightConfiguration current = v.getWeightConfiguration();
+        currentDW = new AwareConfiguration(current, executionManager.getCurrentLeader());
+        Long estimate_current = simulator.predictLatency(replicaSet, currentDW.getLeader(),
+                currentDW.getWeightConfiguration(), propose, write, n, f, delta, ROUNDS_AMORTIZATION);
+        currentDW.setPredictedLatency(estimate_current);
+        SensorApp.getInstance(svc).getSuspicionSensor().setDeltaRound(estimate_current);
+    }
+
     /**
      * This is where we start our search for the best weight configuration and
      * protocol leader. We will generate
@@ -135,6 +173,7 @@ public class AwareController {
         Long estimate_current = simulator.predictLatency(replicaSet, currentDW.getLeader(),
                 currentDW.getWeightConfiguration(), propose, write, n, f, delta, ROUNDS_AMORTIZATION);
         currentDW.setPredictedLatency(estimate_current);
+        SensorApp.getInstance(svc).getSuspicionSensor().setDeltaRound(estimate_current);
 
         // For larger systems, use heuristic, e.g, Simulated Annealing
         if (n > N_SIZE_TO_USE_HEURISTICS) {
@@ -242,6 +281,10 @@ public class AwareController {
             computationOfBestConfig.start();
         }
 
+        if (svc.getStaticConf().isUseDynamicWeights() && LatencyMonitor.getInstance(svc).isInitialized() && cid > 0 ) {
+            AwareController.getInstance(svc, executionManager).computeConsensusLatencyExpectation(svc.getCurrentView());
+        }
+
         // Re-calculate best weight distribution after every x consensus
         if (svc.getStaticConf().isUseDynamicWeights()
                 && (cid % svc.getStaticConf().getCalculationInterval()) == svc.getStaticConf().getCalculationDelay()
@@ -250,6 +293,7 @@ public class AwareController {
             // Lock here until reconfiguration completes
             executionManager.getTOMLayer().getReconfigurationLock().lock();
 
+            logger.info("________________RECONFIGURATION CHECK_________________________________");
             logger.info("Trying to lock, Computation should be completed, at cid" + cid);
 
             computationCompletedLock.lock();
@@ -337,10 +381,11 @@ public class AwareController {
                 logger.info("|OptiLog|  [ ] Optimization: leader selection: no leader change," +
                         " current leader is the best leader");
             }
-            LatencyMonitor.getInstance(viewControl).init(svc.getCurrentViewN());
+            LatencyMonitor.getInstance(viewControl).clear(svc.getCurrentViewN());
             /* End critical section */
             computationCompletedLock.unlock();
             logger.info("Optimization code completed");
+            logger.info("___________________________________________");
             this.lastReconfigurationCID = cid;
             executionManager.getTOMLayer().getReconfigurationLock().unlock();
             // Signal TOMLayer to continue processing consensus instances

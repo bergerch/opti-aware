@@ -1,7 +1,14 @@
 package bftsmart.optilog.PrecisionClock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Instant;
 import java.io.File;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class PTPClock {
 
@@ -13,9 +20,12 @@ public class PTPClock {
 
     private static final String PTP_DEVICE_PATH = "/dev/ptp0";
 
+
     private static boolean checkPTP() {
         return new java.io.File(PTP_DEVICE_PATH).exists();
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(PTPClock.class);
 
     public static void checkTimeProtocol() {
         // Check if PTP is available
@@ -23,14 +33,14 @@ public class PTPClock {
 
         // Print whether PTP or NTP is being used
         if (isPTPAvailable) {
-            System.out.println("> OptiLog: ✅ Using PTP (Precision Time Protocol)");
+            logger.info("> OptiLog: ✅ Using PTP (Precision Time Protocol)");
         } else {
-            System.out.println("> OptiLog: 🕒 Using NTP (Network Time Protocol)");
+            logger.info("> OptiLog: 🕒 Using NTP (Network Time Protocol)");
         }
 
         // Generate and print a timestamp
         Instant timestamp = PTP_timestamp();
-        System.out.println("System started at:" + timestamp);
+        logger.trace("System started at:{}", timestamp);
     }
 
     public static long precisionTimestamp() {
@@ -46,11 +56,11 @@ public class PTPClock {
                     timestampNanos / 1_000_000_000L, // Convert nanoseconds to seconds
                     timestampNanos % 1_000_000_000L  // Keep remaining nanoseconds
             );
-            System.out.println("✅ PTP Timestamp: " + ptpTime);
+            logger.trace("✅ PTP Timestamp: {}", ptpTime);
             return ptpTime;
         } else {
             Instant fallbackTime = Instant.now(); // Use high-precision Java time
-            System.out.println("🕒 Fallback to NTP: " + fallbackTime);
+            logger.trace("\uD83D\uDD52 Fallback to NTP: {}", fallbackTime);
             return fallbackTime;
         }
     }

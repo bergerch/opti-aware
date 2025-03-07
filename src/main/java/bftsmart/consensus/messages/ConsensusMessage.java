@@ -1,18 +1,18 @@
 /**
-Copyright (c) 2007-2013 Alysson Bessani, Eduardo Alchieri, Paulo Sousa, and the authors indicated in the @author tags
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright (c) 2007-2013 Alysson Bessani, Eduardo Alchieri, Paulo Sousa, and the authors indicated in the @author tags
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package bftsmart.consensus.messages;
 
 import java.io.*;
@@ -31,7 +31,7 @@ public class ConsensusMessage extends SystemMessage {
     protected int paxosType; // Message type
     private byte[] value = null; // Value used when message type is PROPOSE
     private Object proof; // Proof used when message type is COLLECT
-                              // Can be either a MAC vector or a signature
+    // Can be either a MAC vector or a signature
 
     // OptiLog: Append a timestamp to some consensus messages to monitor latency
     private long sentTimestamp = 0L;
@@ -42,7 +42,8 @@ public class ConsensusMessage extends SystemMessage {
     /**
      * Creates a consensus message. Not used. TODO: How about making it private?
      */
-    public ConsensusMessage(){}
+    public ConsensusMessage() {
+    }
 
     /**
      * Creates a consensus message. Used by the message factory to create a COLLECT or PROPOSE message
@@ -53,7 +54,7 @@ public class ConsensusMessage extends SystemMessage {
      * @param from This should be this process ID
      * @param value This should be null if its a COLLECT message, or the proposed value if it is a PROPOSE message
      */
-    public ConsensusMessage(int paxosType, int id,int epoch,int from, byte[] value){
+    public ConsensusMessage(int paxosType, int id, int epoch, int from, byte[] value) {
 
         super(from);
 
@@ -74,7 +75,7 @@ public class ConsensusMessage extends SystemMessage {
      * @param epoch Epoch timestamp
      * @param from This should be this process ID
      */
-    public ConsensusMessage(int type, int id,int epoch, int from) {
+    public ConsensusMessage(int type, int id, int epoch, int from) {
 
         this(type, id, epoch, from, null);
 
@@ -139,7 +140,6 @@ public class ConsensusMessage extends SystemMessage {
         /** AWARE **/
         challenge = in.readInt();
         /*** End AWARE **/
-
 
 
         int toRead = in.readInt();
@@ -249,9 +249,7 @@ public class ConsensusMessage extends SystemMessage {
     }
 
 
-
-    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException
-    {
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
         sender = in.readInt();
         number = in.readInt();
         epoch = in.readInt();
@@ -286,8 +284,7 @@ public class ConsensusMessage extends SystemMessage {
 
     }
 
-    private void writeObject(ObjectOutputStream out) throws IOException
-    {
+    private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(sender);
         out.writeInt(number);
         out.writeInt(epoch);

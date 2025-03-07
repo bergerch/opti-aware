@@ -17,6 +17,7 @@ package bftsmart.communication;
 
 import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.consensus.roles.Acceptor;
+import bftsmart.optilog.SensorApp;
 import bftsmart.optilog.messages.LatencyMonitoringMessage;
 import bftsmart.statemanagement.SMMessage;
 import bftsmart.tom.core.TOMLayer;
@@ -87,6 +88,14 @@ public class MessageHandler {
                         .createProposeResponse(consMsg.getNumber(), consMsg.getEpoch(), consMsg.getChallenge(), ((ConsensusMessage) sm).getValue()));
             }
             /** END AWARE **/
+            // OptiLog
+            if (consMsg.getPaxosVerboseType().equals("PROPOSE")) {
+                SensorApp.getInstance(tomLayer.controller).getSuspicionSensor().checkProposal(consMsg);
+            }
+            if (consMsg.getPaxosVerboseType().equals("WRITE") || consMsg.getPaxosVerboseType().equals("ACCEPT")) {
+                SensorApp.getInstance(tomLayer.controller).getSuspicionSensor().checkVote(consMsg);
+            }
+            // END OptiLog
 
             if (consMsg.authenticated || consMsg.getSender() == myId)
                 acceptor.deliver(consMsg);
@@ -117,7 +126,6 @@ public class MessageHandler {
                             type = "LOCAL";
                             break;
                     }
-                    logger.info("Received leader change message of type {} for regency {} from replica {}", type, lcMsg.getReg(), lcMsg.getSender());
                     if (lcMsg.getReg() != -1 && lcMsg.getSender() != -1)
                         logger.info("Received leader change message of type {} " + "for regency {} from replica {}",
                                 type, lcMsg.getReg(), lcMsg.getSender());

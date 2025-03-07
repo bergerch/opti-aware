@@ -27,10 +27,10 @@ ssh.settings {
 
 remotes {
     master {
-        host = '<ip>'
-        user = '<username>'
+        host = '192.168.12.211'
+        user = 'cb'
         //password = '<password>'
-        identity=file('<private key file>')
+        identity=file('../../.ssh/cb')
     }
 }
 
@@ -39,6 +39,19 @@ task remoteDeploy(dependsOn: installDist) {
         def fileSeparator = System.getProperty("file.separator")
         def src = project.buildDir.name + fileSeparator + "install" + fileSeparator + project.name
         def target = '~/'
+        ssh.run {
+            session(remotes.master) {
+                put from: src, into: target
+            }
+        }
+    }
+}
+
+task remoteDeploySource(dependsOn: installDist) {
+    doLast {
+        def fileSeparator = System.getProperty("file.separator")
+        def src = "src"
+        def target = '~/tool/library/'
         ssh.run {
             session(remotes.master) {
                 put from: src, into: target

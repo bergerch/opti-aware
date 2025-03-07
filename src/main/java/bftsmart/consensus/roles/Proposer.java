@@ -16,6 +16,7 @@ limitations under the License.
 package bftsmart.consensus.roles;
 
 import bftsmart.communication.ServerCommunicationSystem;
+import bftsmart.consensus.messages.ConsensusMessage;
 import bftsmart.consensus.messages.MessageFactory;
 import bftsmart.reconfiguration.ServerViewController;
 
@@ -51,9 +52,12 @@ public class Proposer {
      * @param value Value to be proposed
      */
     public void startConsensus(int cid, byte[] value) {
+        ConsensusMessage proposal = factory.createPropose(cid, 0, value);
+        /*** OptiLog **/
+        proposal.timestamp();
+        /***  End OptiLog **/
         //******* EDUARDO BEGIN **************//
-        communication.send(this.controller.getCurrentViewAcceptors(),
-                factory.createPropose(cid, 0, value));
+        communication.send(this.controller.getCurrentViewAcceptors(), proposal);
         //******* EDUARDO END **************//
     }
 }

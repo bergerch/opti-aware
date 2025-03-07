@@ -2,6 +2,7 @@ package bftsmart.optilog;
 
 import bftsmart.optilog.sensors.LatencyMeasurement;
 import bftsmart.optilog.sensors.LatencySensor;
+import bftsmart.optilog.sensors.SuspicionMeasurement;
 import bftsmart.optilog.sensors.SuspicionSensor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceProxy;
@@ -49,6 +50,8 @@ public class SensorApp {
         // Init all of the sensors to collect data from:
         proposeLatencySensor = new LatencySensor(svc);
         writeLatencySensor = new LatencySensor(svc);
+
+        suspicionSensor = new SuspicionSensor(svc, this);
     }
 
     public static SensorApp getInstance(ServerViewController svc) {
@@ -86,12 +89,21 @@ public class SensorApp {
         }, svc.getStaticConf().getSynchronisationDelay(), svc.getStaticConf().getSynchronisationPeriod());
     }
 
+    public void publishSuspicion(SuspicionMeasurement suspicion) {
+        byte[] data  = SuspicionMeasurement.toBytes(suspicion);
+        consensusEngine.propose(data, TOMMessageType.MEASUREMENT_SUSPICION);
+    }
+
     public synchronized LatencySensor getWriteLatencySensor() {
         return writeLatencySensor;
     }
 
     public synchronized LatencySensor getProposeLatencySensor() {
         return proposeLatencySensor;
+    }
+
+    public synchronized SuspicionSensor getSuspicionSensor() {
+        return suspicionSensor;
     }
 
     /**

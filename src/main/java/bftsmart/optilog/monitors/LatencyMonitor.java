@@ -1,12 +1,13 @@
 package bftsmart.optilog.monitors;
 
-import bftsmart.optilog.SensorApp;
 import bftsmart.optilog.sensors.LatencyMeasurement;
 import bftsmart.optilog.Monitor;
 import bftsmart.optilog.sensors.LatencySensor;
 import bftsmart.reconfiguration.ServerViewController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
 
 /**
  * Singelton pattern. Only one instance of Monitor should be used
@@ -39,6 +40,8 @@ public class LatencyMonitor implements Monitor {
     private Long[][] m_propose;
     private Long[][] m_write;
 
+    private HashMap<Integer, Integer> notifications;
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
@@ -53,7 +56,9 @@ public class LatencyMonitor implements Monitor {
         this.writeLatencySensor = new LatencySensor(svc);
         this.proposeLatencySensor = new LatencySensor(svc);
 
-        init(n);
+        notifications = new HashMap<>();
+
+        clear(n);
         /*
         // Periodically compute point-to-point latencies
         Timer timer = new Timer();
@@ -91,6 +96,8 @@ public class LatencyMonitor implements Monitor {
 
         m_write[sender] = li.writeLatencies;
         m_propose[sender] = li.proposeLatencies;
+
+        notifications.put(sender, consensusID);
 
         // printM("Updated", m_write, consensusID, n); // Todo outcomment later
     }
@@ -143,7 +150,7 @@ public class LatencyMonitor implements Monitor {
         return m_write;
     }
 
-    public  synchronized void init(int n) {
+    public synchronized void clear(int n) {
         this.m_propose = new Long[n][n];
         this.m_write = new Long[n][n];
         for (int i = 0; i < n; i++) {
@@ -152,7 +159,11 @@ public class LatencyMonitor implements Monitor {
                 m_propose[i][j] = MISSING_VALUE;
             }
         }
+        notifications = new HashMap<>();
     }
 
+    public synchronized boolean isInitialized() {
+        return notifications.keySet().size() >= (svc.getCurrentViewN() - svc.getCurrentViewF());
+    }
 
 }
