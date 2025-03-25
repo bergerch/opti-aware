@@ -58,6 +58,8 @@ public class ClientsManager {
     
     private ReentrantLock clientsLock = new ReentrantLock();
 
+    public long lastRequestArrivalTime = 0L;
+
     public ClientsManager(ServerViewController controller, RequestsTimer timer, RequestVerifier verifier) {
         this.controller = controller;
         this.timer = timer;
@@ -298,7 +300,8 @@ public class ClientsManager {
      */
     public boolean requestReceived(TOMMessage request, boolean fromClient, ServerCommunicationSystem cs) {
                 
-        long receptionTime = System.nanoTime();
+        long receptionTime = System.currentTimeMillis();
+        this.lastRequestArrivalTime = receptionTime;
         long receptionTimestamp = System.currentTimeMillis();
         
         int clientId = request.getSender();
@@ -521,5 +524,9 @@ public class ClientsManager {
     public int numClients() {
         
         return clientsData.size();
+    }
+
+    public long getLastRequestArrivalTime() {
+        return lastRequestArrivalTime;
     }
 }

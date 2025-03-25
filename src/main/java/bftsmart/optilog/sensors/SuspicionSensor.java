@@ -73,7 +73,8 @@ public class SuspicionSensor {
             return true;
         }
         long roundTime = sentTime - lastSentTime;
-        boolean delayed = roundTime > deltaRound;
+        long currentTime = System.currentTimeMillis();
+        boolean delayed = isDelayed(currentTime, roundTime);
 
         /* Uses that code to test functionality
         if (consensusNumber % 10 == 0) {
@@ -88,22 +89,36 @@ public class SuspicionSensor {
                     (roundTime-deltaRound)/1000000, delayed, roundTime/1000000, this.consensusLatencyExpectation/1000000, sentTime, lastSentTime);
         }*/
 
-        if (delayed) {
+        if (delayed && (consensusNumber % controller.getStaticConf().getCalculationInterval()) != controller.getStaticConf().getCalculationDelay() + 1) { // consensus message is delayed and did not follow-up a reconfiguration
             SuspicionMeasurement suspicion = new SuspicionMeasurement(proposal.getSender(), SuspicionType.SLOW);
-            if (controller.getStaticConf().getProcessId() == 0) { // For more comprehensive logs, let only first process output to LOG a Warning
-                logger.warn("OptiLog >> SuspicionSensor >> Delayed proposal, expected consensus to be {} ns but I observed {} ns for consensus {}", deltaRound, roundTime, consensusNumber);
-            } else {
-                logger.trace("OptiLog >> SuspicionSensor >> Delayed proposal, expected consensus to be {} ns but I observed {} ns for consensus {}", deltaRound, roundTime, consensusNumber);
-            }
+            logger.info("OptiLog >> SuspicionSensor >> Delayed proposal, expected consensus to be {} ns but I observed {} ns for consensus {}", deltaRound, roundTime, consensusNumber);
             sensorapp.publishSuspicion(suspicion);
         }
         return !delayed;
+    }
+
+    private boolean isDelayed(long currentTime, long roundTime) {
+        long timeSinceLastRequestArrived = controller.tomLayer.clientsManager.getLastRequestArrivalTime();
+        long timeDiff = currentTime - timeSinceLastRequestArrived; // Time since the last client request was received (in ms)
+
+        // Raise a suspicion if the observed delay is not higher than the estimation (times some delta)
+        // Dont raise a suspicion if no client request arrived within the last roundTime
+        boolean delayed = (roundTime > deltaRound) && timeDiff*1000000 < roundTime;
+        return delayed;
     }
 
     public synchronized boolean checkVote(ConsensusMessage vote) {
 
         // Todo implement
         return true;
+    }
+
+    public synchronized void returnSuspicionIfFalselyAccused(SuspicionMeasurement suspicion, int reporter) {
+        int me = controller.getStaticConf().getProcessId();
+        if (initialized && suspicion.getSuspect() == me && reporter != me && suspicion.getType() == SuspicionType.SLOW ) { // I was suspected
+            SuspicionMeasurement clarification = new SuspicionMeasurement(reporter, SuspicionType.FALSE);
+            sensorapp.publishSuspicion(clarification);
+        }
     }
 
     public synchronized void setDeltaRound(long consensusLatencyExpectation) {

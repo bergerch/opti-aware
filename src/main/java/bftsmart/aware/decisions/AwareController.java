@@ -3,6 +3,7 @@ package bftsmart.aware.decisions;
 import bftsmart.optilog.SensorApp;
 import bftsmart.optilog.monitors.LatencyMonitor;
 import bftsmart.consensus.roles.Acceptor;
+import bftsmart.optilog.monitors.SuspicionMonitor;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.reconfiguration.views.View;
 import bftsmart.tom.core.ExecutionManager;
@@ -141,8 +142,11 @@ public class AwareController {
      */
     public AwareConfiguration computeBest(View v) {
         Simulator simulator = new Simulator(viewControl);
-        LatencyMonitor monitor = LatencyMonitor.getInstance(viewControl);
-
+        LatencyMonitor latencyMonitor = LatencyMonitor.getInstance(viewControl);
+        /** Begin Optilog **/
+        SuspicionMonitor suspicionMonitor = SuspicionMonitor.getInstance(viewControl);
+        Set<Integer> candidates = suspicionMonitor.getSuspicionGraph().candidateSet();
+        /** End Optilog **/
         int[] replicaSet = v.getProcesses();
         int n = v.getN();
         int f = v.getF();
@@ -152,8 +156,8 @@ public class AwareController {
         // init matrices
         long[][] propose = new long[n][n];
         long[][] write = new long[n][n];
-        Long[][] propose_ast = monitor.sanitize(monitor.getM_propose());
-        Long[][] write_ast = monitor.sanitize(monitor.getM_write());
+        Long[][] propose_ast = latencyMonitor.sanitize(latencyMonitor.getM_propose());
+        Long[][] write_ast = latencyMonitor.sanitize(latencyMonitor.getM_write());
 
         // Long to long
         for (int i = 0; i < n; i++) {
@@ -177,7 +181,7 @@ public class AwareController {
 
         // For larger systems, use heuristic, e.g, Simulated Annealing
         if (n > N_SIZE_TO_USE_HEURISTICS) {
-            return Simulator.simulatedAnnealing(n, f, delta, u, replicaSet, propose, write, cid).best;
+            return Simulator.simulatedAnnealing(n, f, delta, u, replicaSet, propose, write, cid, candidates).best;
         }
 
         // Generate the search space:
@@ -190,6 +194,9 @@ public class AwareController {
         // Generate the search space
         // determine if leader should be selected or not
         for (WeightConfiguration w : weightConfigs) {
+            /** Begin Optilog **/
+           if (!candidates.containsAll(w.getR_max())) continue;
+            /** End Optilog **/
             if (viewControl.getStaticConf().isUseLeaderSelection()) {
                 for (int primary : w.getR_max()) {
                     AwareConfiguration dwConfig = new AwareConfiguration(w, primary);
@@ -262,6 +269,16 @@ public class AwareController {
 
 
            logger.info("Optimize system for next view " + v);
+
+            /** Begin OptiLog **/
+            SuspicionMonitor.getInstance(svc).notify(cid);
+            /*
+            if (svc.getStaticConf().getProcessId() == 1) { // Todo Optilog debug remove later
+                SuspicionMonitor.getInstance(svc).getSuspicionGraph().printGraphAscii();
+            }
+
+             */
+            /** End OptiLog **/
 
             // start new Thread to compute the best AWARE config in the background
             Thread computationOfBestConfig = new Thread() {
@@ -351,7 +368,8 @@ public class AwareController {
 
             if (svc.getStaticConf().isUseLeaderSelection()
                     && executionManager.getCurrentLeader() != best.getLeader()
-                    && ((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal()) {
+                    && (((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal()) ||
+                        !SuspicionMonitor.getInstance(svc).getSuspicionGraph().candidateSet().contains(executionManager.getCurrentLeader())) {
 
                 // The current leader is not the best, change it to the best
                 int newLeader = (best.getLeader() + svc.getCurrentViewN()) % svc.getCurrentViewN();

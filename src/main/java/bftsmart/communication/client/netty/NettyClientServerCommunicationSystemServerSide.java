@@ -166,7 +166,7 @@ public class NettyClientServerCommunicationSystemServerSide extends SimpleChanne
 
 
 			PTPClock.checkTimeProtocol();
-			logger.info("Opti-AWARE Build 24. Feb 2025| Extensions: ");
+			logger.info("Opti-AWARE Build 25. March 2025| Extensions: ");
 
 			logger.info("WHEAT Extensions [on/off]: " + (controller.getStaticConf().isUseWeights()?"on":"off"));
 			logger.info("AWARE Extensions [on/off]: " + (controller.getStaticConf().isUseDynamicWeights()?"on":"off"));

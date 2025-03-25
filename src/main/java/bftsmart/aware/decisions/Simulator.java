@@ -1,5 +1,7 @@
 package bftsmart.aware.decisions;
 
+import bftsmart.optilog.monitors.SuspicionMonitor;
+import bftsmart.optilog.sensors.SuspicionMeasurement;
 import bftsmart.reconfiguration.ServerViewController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,14 +241,26 @@ public class Simulator {
 
 
 
-    public static SimulationRun simulatedAnnealing(int n, int f, int delta, int u, int[] replicaSet, long[][] propose, long[][] write, long seed) {
+    public static SimulationRun simulatedAnnealing(int n, int f, int delta, int u, int[] replicaSet, long[][] propose, long[][] write, long seed, Set<Integer> candidates) {
 
         long t1 = System.nanoTime();
         Simulator simulator = new Simulator(null);
 
         // Initialize
         WeightConfiguration w = new WeightConfiguration(u, replicaSet);
-        AwareConfiguration x = new AwareConfiguration(w, 0);
+        int leader = 0;
+        // Begin OptiLog
+        if (candidates != null) {
+            boolean leaderFound = false;
+            for (int i = 0; i < n && !leaderFound; i++) {
+                if (candidates.contains(i)) {
+                    leader = i;
+                    leaderFound = true;
+                }
+            }
+        }
+        // End OptiLog
+        AwareConfiguration x = new AwareConfiguration(w, leader);
         AwareConfiguration best = x;
         long prediction = simulator.predictLatency(replicaSet, x.getLeader(), x.getWeightConfiguration(), propose,
                 write, n, f, delta, 10);
@@ -272,12 +286,30 @@ public class Simulator {
             examined++;
             AwareConfiguration y = new AwareConfiguration(x.getWeightConfiguration().deepCopy(), x.getLeader());
 
-            // Create a random variation of configuration x
-            int randomReplicaFrom = random.nextInt(u);
-            int randomReplicaTo = random.nextInt(n - u);
 
             TreeSet<Integer> R_max = (TreeSet<Integer>) y.getWeightConfiguration().getR_max();
             TreeSet<Integer> R_min = (TreeSet<Integer>) y.getWeightConfiguration().getR_min();
+
+            int randomReplicaFrom = random.nextInt(u);
+            int randomReplicaTo = random.nextInt(n - u);
+            // Create a random variation of configuration x
+
+            /*
+            TreeSet<Integer> R_max_suspects = new TreeSet<>();
+            TreeSet<Integer> R_min_unsuspected = new TreeSet<>();
+            if (candidates != null) {
+                R_max_suspects = new TreeSet<>(R_max);
+                R_max_suspects.removeAll(candidates);
+                R_min_unsuspected = new TreeSet<>(R_min);
+                R_min_unsuspected.retainAll(candidates);
+            }
+            if (!R_max_suspects.isEmpty()) {
+                randomReplicaFrom = random.nextInt(R_max_suspects.size());
+            }
+            if (!R_min_unsuspected.isEmpty()) {
+                randomReplicaTo = random.nextInt(R_min_unsuspected.size());
+            }
+            */
 
             Integer max = (Integer) R_max.toArray()[randomReplicaFrom];
             Integer min = (Integer) R_min.toArray()[randomReplicaTo];
@@ -288,6 +320,9 @@ public class Simulator {
 
             // Swap min and max replica
             if (max.equals(y.getLeader())) {
+                // Begin OptiLog
+                if (candidates != null && !candidates.contains(min)) continue;
+                // End OptiLog
                 y.setLeader(min);
             }
             R_max.remove(max);

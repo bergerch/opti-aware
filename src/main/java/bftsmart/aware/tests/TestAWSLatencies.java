@@ -44,7 +44,7 @@ public class TestAWSLatencies {
                 SimulationRun sim;
 
                 if (strategy.equals("SA")) {
-                    sim = Simulator.simulatedAnnealing(SIZE, f, delta, u, replicaset, m, m, 0);
+                    sim = Simulator.simulatedAnnealing(SIZE, f, delta, u, replicaset, m, m, 0, null);
                 } else {
                     sim = Simulator.exhaustiveSearch(SIZE, f, delta, u, replicaset, m, m);
                 }
