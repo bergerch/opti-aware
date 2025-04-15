@@ -175,7 +175,7 @@ public class AwareController {
         current = v.getWeightConfiguration();
         currentDW = new AwareConfiguration(current, executionManager.getCurrentLeader());
         Long estimate_current = simulator.predictLatency(replicaSet, currentDW.getLeader(),
-                currentDW.getWeightConfiguration(), propose, write, n, f, delta, ROUNDS_AMORTIZATION);
+        currentDW.getWeightConfiguration(), propose, write, n, f, delta, ROUNDS_AMORTIZATION);
         currentDW.setPredictedLatency(estimate_current);
         SensorApp.getInstance(svc).getSuspicionSensor().setDeltaRound(estimate_current);
 

@@ -2,25 +2,37 @@ package bftsmart.optilog.monitors;
 
 import bftsmart.reconfiguration.ServerViewController;
 import org.jgrapht.Graph;
+import org.jgrapht.alg.clique.BronKerboschCliqueFinder;
 import org.jgrapht.alg.matching.GreedyMaximumCardinalityMatching;
+import org.jgrapht.generate.ComplementGraphGenerator;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.DirectedWeightedMultigraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.jgrapht.alg.clique.DegeneracyBronKerboschCliqueFinder;
+import org.jgrapht.Graphs;
+
+
+//import org.jgrapht.alg.clique.;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class SuspicionGraph {
 
     private Graph<Integer, DefaultWeightedEdge> suspicionGraph = new DirectedWeightedMultigraph<>(DefaultWeightedEdge.class);
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private ServerViewController controller;
 
     public SuspicionGraph(ServerViewController controller) {
         this.controller = controller;
+        // Add processes to the graph
+        for (int i=0; i < controller.getCurrentViewN(); i++) {
+            suspicionGraph.addVertex(i);
+        }
     }
 
     public synchronized void addSuspicion(int reporter, int suspect) {
@@ -62,43 +74,53 @@ public class SuspicionGraph {
         suspicionGraph = new DirectedWeightedMultigraph<>(DefaultWeightedEdge.class);
     }
 
+    public static Set<Integer> maxIndependentSet(Graph<Integer, DefaultWeightedEdge>  sGraph, boolean exhaustive) {
+        // Step 1: Compute the undirected graph equivalent (turns directed edges into undirected)
+        Graph<Integer, DefaultWeightedEdge> undirectedGraph = convertToUndirected(sGraph);
+
+        // Step 2: Compute the complementary Graph G' (contains an edge e where is no edge in G and vice versa)
+        //     Create an empty weighted graph for the complement
+        Graph<Integer, DefaultWeightedEdge> complement = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+        //      Use ComplementGraphGenerator to populate it
+        ComplementGraphGenerator<Integer, DefaultWeightedEdge> generator = new ComplementGraphGenerator<>(undirectedGraph);
+        generator.generateGraph(complement);
+
+        Iterator<Set<Integer>> maxIter;
+
+        // Step 3: Run the Clique Finder on the complement graph (this is equivalent of finding the independent set):
+        if (exhaustive) {
+            BronKerboschCliqueFinder<Integer, DefaultWeightedEdge> cliqueFinder =
+                    new BronKerboschCliqueFinder<>(complement);
+            maxIter = cliqueFinder.maximumIterator();
+        } else {    // heuristically find independent set
+            DegeneracyBronKerboschCliqueFinder<Integer, DefaultWeightedEdge> cliqueFinder =
+                    new DegeneracyBronKerboschCliqueFinder<>(complement, 100000, TimeUnit.MILLISECONDS);
+            maxIter = cliqueFinder.maximumIterator();
+        }
+
+        Set<Integer> maxIndependentSet = maxIter.hasNext() ? maxIter.next() : Collections.emptySet();
+
+        return maxIndependentSet;
+    }
+
+
     public synchronized Set<Integer> candidateSet() {
-        // Step 1: Compute maximal set of disjoint edges
-        Graph<Integer, DefaultWeightedEdge> undirectedGraph = convertToUndirected(suspicionGraph);
-        GreedyMaximumCardinalityMatching<Integer, DefaultWeightedEdge> matchingAlgo = new GreedyMaximumCardinalityMatching<>(undirectedGraph, false);
-        Set<DefaultWeightedEdge> matchingEdges = matchingAlgo.getMatching().getEdges();
 
-        logger.info(">>> OptiLog: SuspicionGraph: Maximal set of disjoint edges: {}", matchingEdges);
-
-        // Step 2: Find all triangles in the graph
-        Set<Set<Integer>> triangles = findTriangles(suspicionGraph);
-
-        // Step 3: Identify vertices fulfilling the criteria from the paper:
-        Set<Integer> condition = findVerticesMeetingConditions(suspicionGraph, triangles, matchingEdges);
+        //Set<Integer> maxIndependentSet = maxIndependentSet(this.suspicionGraph, false);
+        Set<Integer> maxIndependentSet = greedyIndependentSet(this.suspicionGraph);
 
         // Output the final result
-        logger.info(">>> OptiLog: SuspicionGraph: Vertices fulfilling the second conditions: " + condition);
+        logger.info(">>> OptiLog: SuspicionGraph: Vertices in maximum independent set: " + maxIndependentSet);
 
-        // Init result set with *all* system nodes
-        Set<Integer> resultSet = Arrays.stream(controller.getCurrentView().getProcesses()).boxed().collect(Collectors.toSet());
-
-        // Now build the set that is excluded from being candidates:
-        Set<Integer> exclusionList = new LinkedHashSet<>();
-        for (DefaultWeightedEdge edge : matchingEdges) {
-            exclusionList.add(suspicionGraph.getEdgeSource(edge));
-            exclusionList.add(suspicionGraph.getEdgeTarget(edge));
+        // Return max Independent set if sufficiently large
+        if (maxIndependentSet.size() >= controller.getCurrentViewF() + 1) {
+            return maxIndependentSet;
         }
-        exclusionList.addAll(condition); // Adds only non-duplicate elements
+        // If not large enough use an heuristic to craft a candidate set
+        // (this might be the case during network disruptions)
+        logger.warn(">>> OptiLog: SuspicionGraph: Using heuristic to craft candidate set");
 
-        // Ensure candidate set is at least of size f+1 so exclusion least cant be larger than n-f-1
-        if (exclusionList.size() > (controller.getCurrentViewN() - controller.getCurrentViewF() - 1)) {
-            exclusionList = reduceExclusionList(exclusionList);
-        }
-        resultSet.removeAll(exclusionList);
-
-        logger.info(">>> OptiLog: SuspicionGraph: CandidateSet is " + resultSet);
-
-        return resultSet;
+        return heuristicCandidateSet();
     }
 
     // Find all triangles in the graph
@@ -191,7 +213,7 @@ public class SuspicionGraph {
         }
     }
 
-    private Graph<Integer, DefaultWeightedEdge> convertToUndirected(Graph<Integer, DefaultWeightedEdge> directedGraph) {
+    private static Graph<Integer, DefaultWeightedEdge> convertToUndirected(Graph<Integer, DefaultWeightedEdge> directedGraph) {
         // Create an undirected graph
         Graph<Integer, DefaultWeightedEdge> undirectedGraph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
@@ -225,5 +247,119 @@ public class SuspicionGraph {
 
         return undirectedGraph;
     }
+
+    private Set<Integer> heuristicCandidateSet(){
+        // Step 1: Compute maximal set of disjoint edges
+        Graph<Integer, DefaultWeightedEdge> undirectedGraph = convertToUndirected(suspicionGraph);
+        GreedyMaximumCardinalityMatching<Integer, DefaultWeightedEdge> matchingAlgo = new GreedyMaximumCardinalityMatching<>(undirectedGraph, false);
+        Set<DefaultWeightedEdge> matchingEdges = matchingAlgo.getMatching().getEdges();
+
+        logger.info(">>> OptiLog: SuspicionGraph: Maximal set of disjoint edges: {}", matchingEdges);
+
+        // Step 2: Find all triangles in the graph
+        Set<Set<Integer>> triangles = findTriangles(suspicionGraph);
+
+        // Step 3: Identify vertices fulfilling the criteria from the paper:
+        Set<Integer> condition = findVerticesMeetingConditions(suspicionGraph, triangles, matchingEdges);
+
+        // Output the final result
+        logger.info(">>> OptiLog: SuspicionGraph: Vertices fulfilling the second conditions: " + condition);
+
+
+        // Init result set with *all* system nodes
+        Set<Integer> resultSet = Arrays.stream(controller.getCurrentView().getProcesses()).boxed().collect(Collectors.toSet());
+
+        // Now build the set that is excluded from being candidates:
+        Set<Integer> exclusionList = new LinkedHashSet<>();
+        for (DefaultWeightedEdge edge : matchingEdges) {
+            exclusionList.add(suspicionGraph.getEdgeSource(edge));
+            exclusionList.add(suspicionGraph.getEdgeTarget(edge));
+        }
+        exclusionList.addAll(condition); // Adds only non-duplicate elements
+
+        // Ensure candidate set is at least of size f+1 so exclusion least cant be larger than n-f-1
+        if (exclusionList.size() > (controller.getCurrentViewN() - controller.getCurrentViewF() - 1)) {
+            exclusionList = reduceExclusionList(exclusionList);
+        }
+        resultSet.removeAll(exclusionList);
+
+        logger.info(">>> OptiLog: SuspicionGraph: CandidateSet is " + resultSet);
+
+        return resultSet;
+    }
+
+    public static void main(String[] args) {
+
+        for (int i = 1; i < 8; i++) {
+            unittest(i);
+        }
+    }
+    public static void unittest(int scale) {
+
+        int f = 10*scale;
+        int n = 3*f+1;
+
+        Graph<Integer, DefaultWeightedEdge> sGraph = new DirectedWeightedMultigraph<>(DefaultWeightedEdge.class);
+        for (int i = 0; i < n; i++) {
+            sGraph.addVertex(i);
+        }
+        // there should be roughly 2*f*f edges, i.e. each of f Byzantine nodes blames f random correct nodes
+        for (int i = 0; i < f; i++) {
+            Random r = new Random();
+            for (int j=0; j<f; j++) {
+
+                // Blame a random correct node
+                int random = f + r.nextInt(f);
+
+                sGraph.addEdge(i, random);
+                sGraph.addEdge(random, i);
+
+            }
+        }
+        System.out.println();
+        System.out.println("______________________________________");
+        System.out.println("____________Next Test_________________");
+        System.out.println("______________________________________");
+        System.out.println("n is " + n + ", f is " + f);
+        System.out.println("Expect independent set to be of size 2f+1 which is " + (2*f+1));
+        System.out.println( "Number of vertices: " + sGraph.vertexSet().size());
+        System.out.println( "Number of edges: " + sGraph.edgeSet().size());
+
+        System.out.println( "Start Search for independent set");
+        long start = System.nanoTime();
+        Set<Integer> maxIndependentSet = greedyIndependentSet(sGraph);
+                //maxIndependentSet(sGraph, false);
+        long end = System.nanoTime();
+
+        // Output the final result
+        System.out.println( "maximum independent set: " + maxIndependentSet);
+
+        System.out.println( "Size of maximum independent set: " + maxIndependentSet.size());
+        System.out.println("Test completed in " + ((end - start)/1000000) + " ms");
+      //  System.out.println("______________________________________");
+    }
+
+
+    public static Set<Integer> greedyIndependentSet(Graph<Integer, DefaultWeightedEdge> graph) {
+        Set<Integer> independentSet = new LinkedHashSet<>();
+        Set<Integer> excluded = new HashSet<>();
+
+        // Work on a copy of the vertex set, sorted by ascending degree (greedy heuristic)
+        List<Integer> sortedVertices = new ArrayList<>(graph.vertexSet());
+        sortedVertices.sort(Comparator.comparingInt(graph::degreeOf)); // prefer low-degree nodes
+
+        for (Integer v : sortedVertices) {
+            if (!excluded.contains(v)) {
+                // Add v to independent set
+                independentSet.add(v);
+
+                // Exclude v and all its neighbors from future consideration
+                excluded.add(v);
+                excluded.addAll(Graphs.neighborListOf(graph, v));
+            }
+        }
+        return independentSet;
+    }
+
 
 }
