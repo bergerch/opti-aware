@@ -309,10 +309,11 @@ public class SuspicionGraph {
             for (int j=0; j<f; j++) {
 
                 // Blame a random correct node
-                int random = f + r.nextInt(f);
-
-                sGraph.addEdge(i, random);
-                sGraph.addEdge(random, i);
+                int random = r.nextInt(3*f+1);
+                if (i != random) {
+                    sGraph.addEdge(i, random);
+                    sGraph.addEdge(random, i);
+                }
 
             }
         }
@@ -327,8 +328,8 @@ public class SuspicionGraph {
 
         System.out.println( "Start Search for independent set");
         long start = System.nanoTime();
-        Set<Integer> maxIndependentSet = greedyIndependentSet(sGraph);
-                //maxIndependentSet(sGraph, false);
+        Set<Integer> maxIndependentSet = //greedyIndependentSet(sGraph);
+                maxIndependentSet(sGraph, false);
         long end = System.nanoTime();
 
         // Output the final result

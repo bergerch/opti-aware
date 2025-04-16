@@ -56,7 +56,7 @@ public class Proposer {
         /*** OptiLog **/
         proposal.timestamp();
         /***  End OptiLog **/
-        /*
+
         //Todo remove the next lines later, just used for a quick test:
         if (cid % 2 == 0 && controller.getStaticConf().getProcessId() == 12) {
             try {
@@ -65,7 +65,7 @@ public class Proposer {
                 throw new RuntimeException(e);
             }
         }
-        */
+
        // Todo remove the above lines later, just used for a quick test:
         //******* EDUARDO BEGIN **************//
         communication.send(this.controller.getCurrentViewAcceptors(), proposal);
