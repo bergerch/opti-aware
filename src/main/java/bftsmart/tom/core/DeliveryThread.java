@@ -311,6 +311,7 @@ public final class DeliveryThread extends Thread {
 						 */
 						AppendOnlyLog.getInstance(controller).commit(d);
 						AwareController.getInstance(controller, tomLayer.execManager).optimize(d.getConsensusId());
+						SensorApp.getInstance(controller).updateRoundInformation(d.getConsensusId(), tomLayer.execManager.getCurrentLeader());
 					}
 
 					Decision lastDecision = decisions.get(decisions.size() - 1);

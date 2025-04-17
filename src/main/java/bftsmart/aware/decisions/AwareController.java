@@ -145,7 +145,7 @@ public class AwareController {
         LatencyMonitor latencyMonitor = LatencyMonitor.getInstance(viewControl);
         /** Begin Optilog **/
         SuspicionMonitor suspicionMonitor = SuspicionMonitor.getInstance(viewControl);
-        Set<Integer> candidates = suspicionMonitor.getSuspicionGraph().candidateSet();
+        Set<Integer> candidates = suspicionMonitor.computeCandidateSet();
         /** End Optilog **/
         int[] replicaSet = v.getProcesses();
         int n = v.getN();
@@ -289,6 +289,8 @@ public class AwareController {
                     /* Begin critical section */
                     AwareController awareController = AwareController.getInstance(svc, executionManager);
                     awareController.setBest(awareController.computeBest(v));
+                    SuspicionMonitor.getInstance(svc).garbageCollect(cid);
+                    System.out.println("... Garbage collecting old suspicions up to index " + cid);
                     /* End critical section */
                     computationCompletedLock.unlock();
                     long end = System.nanoTime();
@@ -332,6 +334,8 @@ public class AwareController {
             logger.info("!!! Best: " + best);
             logger.info("");
 
+            boolean viewchange = true;
+
             if (svc.getStaticConf().isUseDynamicWeights()
                     && ((!currentWeights.equals(bestWeights)
                     && ((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal()))
@@ -356,6 +360,8 @@ public class AwareController {
                  * threshold)
                  */
                 svc.reconfigureTo(newView);
+                // Remember that view is already incremented
+                viewchange = false;
                 /** The system now uses the new view */
 
                 AwareController.getInstance(svc, executionManager).setCurrent(bestWeights);
@@ -369,11 +375,19 @@ public class AwareController {
             if (svc.getStaticConf().isUseLeaderSelection()
                     && executionManager.getCurrentLeader() != best.getLeader()
                     && (((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal()) ||
-                        !SuspicionMonitor.getInstance(svc).getSuspicionGraph().candidateSet().contains(executionManager.getCurrentLeader())) {
+                        !SuspicionMonitor.getInstance(svc).computeCandidateSet().contains(executionManager.getCurrentLeader())) {
 
                 // The current leader is not the best, change it to the best
                 int newLeader = (best.getLeader() + svc.getCurrentViewN()) % svc.getCurrentViewN();
                 executionManager.setNewLeader(newLeader);
+
+                if (viewchange) { // Increment view
+                    View currentView = svc.getCurrentView();
+                    View newView;
+                    newView = new View(currentView.getId() + 1, currentView.getProcesses(), currentView.getF(),
+                            currentView.getAddresses(), currentView.isBFT(), currentView.getDelta(), currentView.getWeightConfiguration());
+                    svc.reconfigureTo(newView);
+                }
 
                 logger.info("-----_> NEW LEADER SET TO " + newLeader);
                 if (svc.getStaticConf().getProcessId() == newLeader) {

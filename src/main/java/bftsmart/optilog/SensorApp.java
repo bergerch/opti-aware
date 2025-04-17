@@ -142,6 +142,9 @@ public class SensorApp {
         return result;
     }
 
+    public void updateRoundInformation(int consensus, int leader) {
+        suspicionSensor.notify(consensus, leader);
+    }
 
 
 }

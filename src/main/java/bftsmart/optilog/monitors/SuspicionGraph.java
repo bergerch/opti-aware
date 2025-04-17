@@ -1,5 +1,6 @@
 package bftsmart.optilog.monitors;
 
+import bftsmart.optilog.sensors.SuspicionMeasurement;
 import bftsmart.reconfiguration.ServerViewController;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.clique.BronKerboschCliqueFinder;
@@ -35,7 +36,7 @@ public class SuspicionGraph {
         }
     }
 
-    public synchronized void addSuspicion(int reporter, int suspect) {
+    private synchronized void addSuspicion(int reporter, int suspect) {
 
         if (controller.getStaticConf().getProcessId() == 1) {
             logger.info("OptiLog > SuspicionGraph > addSuspicion called reporter {} , suspect {} ", reporter, suspect);
@@ -53,6 +54,12 @@ public class SuspicionGraph {
             suspicionGraph.setEdgeWeight(suspicion, 1.0); // add a suspicion
         } else {
             suspicionGraph.setEdgeWeight(edge, suspicionGraph.getEdgeWeight(edge) + 1.0); // Increase suspicion weight by 1
+        }
+    }
+
+    public synchronized void populate(List<SuspicionMeasurement> filteredSuspicions) {
+        for (SuspicionMeasurement s: filteredSuspicions) {
+            addSuspicion(s.getReporter(), s.getSuspect());
         }
     }
 
@@ -190,7 +197,7 @@ public class SuspicionGraph {
         return suspects;
     }
 
-    public void printGraphAscii() {
+    public synchronized void printGraphAscii() {
         System.out.println("Suspicion Graph (ASCII Representation):");
 
         // Store formatted edges
