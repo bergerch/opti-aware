@@ -289,8 +289,9 @@ public class AwareController {
                     /* Begin critical section */
                     AwareController awareController = AwareController.getInstance(svc, executionManager);
                     awareController.setBest(awareController.computeBest(v));
-                    SuspicionMonitor.getInstance(svc).garbageCollect(cid);
-                    System.out.println("... Garbage collecting old suspicions up to index " + cid);
+                    int collected = SuspicionMonitor.getInstance(svc).garbageCollect(cid);
+                    System.out.println("... Garbage collecting old suspicions from queue up to index "
+                            + cid + " in total " + collected + " suspicions collected");
                     /* End critical section */
                     computationCompletedLock.unlock();
                     long end = System.nanoTime();
@@ -413,7 +414,7 @@ public class AwareController {
                 logger.info("|OptiLog|  [ ] Optimization: leader selection: no leader change," +
                         " current leader is the best leader");
             }
-            LatencyMonitor.getInstance(viewControl).clear(svc.getCurrentViewN());
+            //LatencyMonitor.getInstance(viewControl).clear(svc.getCurrentViewN());
             /* End critical section */
             computationCompletedLock.unlock();
             logger.info("Optimization code completed");

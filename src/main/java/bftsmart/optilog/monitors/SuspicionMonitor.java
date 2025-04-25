@@ -70,13 +70,15 @@ public class SuspicionMonitor implements Monitor {
     public synchronized void notify(int consensusInstance) {
         // Todo: Here we "clean up" the suspicion graph, by weakening and removing "old" suspicions
         // Todo:  Replace later by a more refined implementation
-        if ((consensusInstance - lastConsensusRemovedOldSuspicions) / 100 > removedOldSuspicions) {
-            suspicionGraph.removeSuspicions(0.1 * (consensusInstance - lastConsensusRemovedOldSuspicions));
-            removedOldSuspicions++;
-            lastConsensusRemovedOldSuspicions = consensusInstance;
-        }
+       // if ((consensusInstance - lastConsensusRemovedOldSuspicions) / 100 > removedOldSuspicions) {
+       //     suspicionGraph.removeSuspicions(0.1 * (consensusInstance - lastConsensusRemovedOldSuspicions));
+       //     removedOldSuspicions++;
+       //     lastConsensusRemovedOldSuspicions = consensusInstance;
+       // }
+    }
 
-
+    public synchronized boolean graphContainsSuspicion(int reporter, int suspect) {
+        return suspicionGraph.existsEdge(reporter, suspect);
     }
 
     public synchronized Set<Integer> computeCandidateSet() {
@@ -130,7 +132,7 @@ public class SuspicionMonitor implements Monitor {
      * Bounds memory consumption by garbage collecting old suspicions that have been populated into the suspicion graph
      * Important: This method does NOT remove suspicions from the suspicion graph
      */
-    public void garbageCollect(int index) {
+    public int garbageCollect(int index) {
         synchronized (suspicions) {
             Collections.sort(suspicions);
             int cutIndex = 0;
@@ -141,6 +143,7 @@ public class SuspicionMonitor implements Monitor {
                 cutIndex++;
             }
             suspicions.subList(0, cutIndex).clear();
+            return cutIndex;
         }
     }
 

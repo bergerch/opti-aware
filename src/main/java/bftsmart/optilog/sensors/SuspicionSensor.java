@@ -40,8 +40,10 @@ public class SuspicionSensor {
 
     private long current_round = 0;
     private long current_round_proposal_sent_time = -1L;
+
     private boolean propose_delayed = false;
     private boolean write_delayed = false;
+    private int lastDelayedRound = -1;
 
     /**
      * Creates a new instance of a latency monitor
@@ -60,9 +62,7 @@ public class SuspicionSensor {
     }
 
     public synchronized boolean checkProposal(ConsensusMessage proposal) {
-
-
-        if (!initialized || proposal == null || 0 >= proposal.getNumber()) {
+        if (!initialized || proposal == null || 0 >= proposal.getNumber() || messageDelays == null) {
             return true;
         }
         this.current_round = proposal.getNumber();
@@ -84,10 +84,13 @@ public class SuspicionSensor {
         } else {
             return true;
         }
-        long roundTime = sentTime - lastSentTime;
-        long currentTime = System.currentTimeMillis();
-        boolean delayed = isDelayedProposal(currentTime, roundTime);
+        //logger.info("--Checking proposal for consensus " + proposal.getNumber());
 
+
+        long roundTime = sentTime - lastSentTime;
+        long currentTimeMillis = System.currentTimeMillis();
+        boolean delayed = isDelayedProposal(sentTime, currentTimeMillis, roundTime, consensusNumber);
+        //logger.info("--Round time: " + roundTime + "propose delayed: " + delayed);
         /* Uses that code to test functionality
         if (consensusNumber % 10 == 0) {
             StringBuilder s = new StringBuilder();
@@ -103,21 +106,35 @@ public class SuspicionSensor {
 
         if (delayed && (consensusNumber % controller.getStaticConf().getCalculationInterval()) != controller.getStaticConf().getCalculationDelay() + 1) { // consensus message is delayed and did not follow-up a reconfiguration
             SuspicionMeasurement suspicion = new SuspicionMeasurement(proposal.getSender(), SuspicionType.SLOW, 'P', consensusNumber);
-            logger.info("OptiLog >> SuspicionSensor >> Delayed proposal, expected consensus to be {} ns but I observed {} ns for consensus {}", deltaRound, roundTime, consensusNumber);
             sensorapp.publishSuspicion(suspicion);
         }
-        this.propose_delayed = delayed;
         return !delayed;
     }
 
-    private boolean isDelayedProposal(long currentTime, long roundTime) {
+    private boolean isDelayedProposal(long proposal_sent_time, long currentTime, long roundTime, int consensusRound) {
         long timeSinceLastRequestArrived = controller.tomLayer.clientsManager.getLastRequestArrivalTime();
         long timeDiff = currentTime - timeSinceLastRequestArrived; // Time since the last client request was received (in ms)
 
-        // Raise a suspicion if the observed delay is not higher than the estimation (times some delta)
-        // Dont raise a suspicion if no client request arrived within the last roundTime
-        boolean delayed = (roundTime > deltaRound) && timeDiff*1000000 < roundTime;
-        return delayed;
+        long timeNow = PTPClock.precisionTimestamp();
+        long observation = timeNow - proposal_sent_time;
+        long expectation = messageDelays.proposedTime;
+
+
+        // Raise a suspicion if a proposal arrives late..
+        double delta = controller.getStaticConf().getSuspicionDelta();
+        if (expectation*delta < observation) {
+            this.propose_delayed = true;
+            this.lastDelayedRound = consensusRound;
+            logger.info("OptiLog >> SuspicionSensor >> Delayed proposal for consensus {}, I expected {} ns but I observed {} ns", consensusRound, expectation, observation);
+            return true;
+        }
+        // Raise a suspicion if the observed round delay is  higher than the estimation (times some delta)
+        // Dont raise a suspicion if no client request arrived within the last roundTime or last round was delayed already
+        boolean delay = roundTime > deltaRound && timeDiff*1000000 < roundTime && consensusRound - 1 != lastDelayedRound;
+        if (delay) {
+            logger.info("OptiLog >> SuspicionSensor >> Delayed proposal from previous round before {}, roundtTime: {} ns ; deltaRound: {} ns", consensusRound, roundTime, deltaRound);
+        }
+        return delay;
     }
 
     public synchronized boolean checkVote(ConsensusMessage vote) {
@@ -166,6 +183,7 @@ public class SuspicionSensor {
             SuspicionMeasurement suspicion = new SuspicionMeasurement(vote.getSender(), SuspicionType.SLOW, protocolMessageType, consensus);
             //if (controller.)
             logger.info("OptiLog >> SuspicionSensor >> Delayed vote, expected arrival to be {} ns but I observed {} ns for consensus {}", expectation, observation, consensus);
+
             sensorapp.publishSuspicion(suspicion);
         }
         // Measure time milis now

@@ -178,4 +178,12 @@ public class SuspicionMeasurement implements Serializable, Comparable<SuspicionM
 
         }
     }
+
+
+    public static void main(String[] args) {
+        // quick serialization test
+        SuspicionMeasurement sm = new SuspicionMeasurement(0, SuspicionType.SLOW, 'P', 0);
+        byte[] serialized = SuspicionMeasurement.toBytes(sm);
+        System.out.println("serialized: " + serialized.length);
+    }
 }

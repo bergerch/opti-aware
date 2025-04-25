@@ -1,5 +1,6 @@
 package bftsmart.optilog;
 
+import bftsmart.optilog.monitors.SuspicionMonitor;
 import bftsmart.optilog.sensors.LatencyMeasurement;
 import bftsmart.optilog.sensors.LatencySensor;
 import bftsmart.optilog.sensors.SuspicionMeasurement;
@@ -90,6 +91,9 @@ public class SensorApp {
     }
 
     public void publishSuspicion(SuspicionMeasurement suspicion) {
+        if (SuspicionMonitor.getInstance(svc).graphContainsSuspicion(suspicion.getReporter(), suspicion.getSuspect())) {
+            return; // Dont publish suspicion because it is already consistently recorded in the graph
+        }
         byte[] data  = SuspicionMeasurement.toBytes(suspicion);
         consensusEngine.propose(data, TOMMessageType.MEASUREMENT_SUSPICION);
     }

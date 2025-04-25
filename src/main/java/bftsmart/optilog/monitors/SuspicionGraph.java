@@ -370,4 +370,10 @@ public class SuspicionGraph {
     }
 
 
+    public synchronized boolean existsEdge(int reporter, int suspect) {
+        if (reporter == suspect) {
+            return true; // graph does not allow self-loops. Return *true* because edge will never be inserted anyways
+        }
+        return suspicionGraph.containsEdge(reporter, suspect);
+    }
 }

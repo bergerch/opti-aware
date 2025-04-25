@@ -60,7 +60,7 @@ public class Proposer {
         //Todo remove the next lines later, just used for a quick test:
         if (cid % 2 == 0 && controller.getStaticConf().getProcessId() == 12) {
             try {
-                Thread.sleep(200); // Mimic a purposely delayed proposal
+                Thread.sleep(500); // Mimic a purposely delayed proposal
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
