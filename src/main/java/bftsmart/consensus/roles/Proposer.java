@@ -58,7 +58,7 @@ public class Proposer {
         /***  End OptiLog **/
 
         //Todo remove the next lines later, just used for a quick test:
-        if (cid % 2 == 0 && controller.getStaticConf().getProcessId() == 12) {
+        if (cid > 1400 &&   controller.getStaticConf().getProcessId() == 11) {
             try {
                 Thread.sleep(500); // Mimic a purposely delayed proposal
             } catch (InterruptedException e) {

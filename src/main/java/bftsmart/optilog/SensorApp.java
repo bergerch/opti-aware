@@ -1,10 +1,7 @@
 package bftsmart.optilog;
 
 import bftsmart.optilog.monitors.SuspicionMonitor;
-import bftsmart.optilog.sensors.LatencyMeasurement;
-import bftsmart.optilog.sensors.LatencySensor;
-import bftsmart.optilog.sensors.SuspicionMeasurement;
-import bftsmart.optilog.sensors.SuspicionSensor;
+import bftsmart.optilog.sensors.*;
 import bftsmart.reconfiguration.ServerViewController;
 import bftsmart.tom.ServiceProxy;
 import bftsmart.tom.core.messages.TOMMessageType;
@@ -94,7 +91,12 @@ public class SensorApp {
         if (SuspicionMonitor.getInstance(svc).graphContainsSuspicion(suspicion.getReporter(), suspicion.getSuspect())) {
             return; // Dont publish suspicion because it is already consistently recorded in the graph
         }
+        if (suspicion.getConsensusID() % svc.getStaticConf().getCalculationInterval() == svc.getStaticConf().getCalculationDelay()) {
+            return;  // Dont publish suspicion because consensus was slower as it followed a reconfiguration round
+        }
         byte[] data  = SuspicionMeasurement.toBytes(suspicion);
+        logger.info("SUSPICION: I suspect " + suspicion.getSuspect() +
+                " type: " + suspicion.getProtocolMessageType() + ", consensus: " + suspicion.getConsensusID());
         consensusEngine.propose(data, TOMMessageType.MEASUREMENT_SUSPICION);
     }
 

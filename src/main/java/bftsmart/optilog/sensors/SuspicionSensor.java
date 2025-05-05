@@ -28,6 +28,7 @@ public class SuspicionSensor {
 
     private long deltaRound = 0;        // delay until leader should start disseminating a proposal
                                         // in ms
+    private static final long MEASUREMENT_ACCURACY = 4_000_000L;  // up to a delay of 4 ms, no supsicion should be raised
     private long consensusLatencyExpectation = 0;
     private Simulator.MessageDelays messageDelays;
     private HashMap<Integer, Long> proposalSentTimes;
@@ -122,7 +123,7 @@ public class SuspicionSensor {
 
         // Raise a suspicion if a proposal arrives late..
         double delta = controller.getStaticConf().getSuspicionDelta();
-        if (expectation*delta < observation) {
+        if (expectation*delta < observation - MEASUREMENT_ACCURACY) {
             this.propose_delayed = true;
             this.lastDelayedRound = consensusRound;
             logger.info("OptiLog >> SuspicionSensor >> Delayed proposal for consensus {}, I expected {} ns but I observed {} ns", consensusRound, expectation, observation);
@@ -130,7 +131,7 @@ public class SuspicionSensor {
         }
         // Raise a suspicion if the observed round delay is  higher than the estimation (times some delta)
         // Dont raise a suspicion if no client request arrived within the last roundTime or last round was delayed already
-        boolean delay = roundTime > deltaRound && timeDiff*1000000 < roundTime && consensusRound - 1 != lastDelayedRound;
+        boolean delay = roundTime-MEASUREMENT_ACCURACY > deltaRound && timeDiff*1000000 < roundTime-MEASUREMENT_ACCURACY && consensusRound - 1 != lastDelayedRound;
         if (delay) {
             logger.info("OptiLog >> SuspicionSensor >> Delayed proposal from previous round before {}, roundtTime: {} ns ; deltaRound: {} ns", consensusRound, roundTime, deltaRound);
         }
@@ -170,7 +171,7 @@ public class SuspicionSensor {
 
         boolean delayed = false;
         double delta = controller.getStaticConf().getSuspicionDelta();
-        if (expectation*delta < observation) {
+        if (expectation*delta < observation-MEASUREMENT_ACCURACY) {
             delayed = true;
             if (vote.getPaxosVerboseType().equals("WRITE")) {
                 write_delayed = true;

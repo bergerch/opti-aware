@@ -52,6 +52,9 @@ public class SuspicionMonitor implements Monitor {
         synchronized (suspicions) {
             suspicions.add(suspicion);
         }
+        if (suspicion.getSuspect() == controller.getStaticConf().getProcessId()) {
+            logger.info(">>SUSPICION Received: I was suspected by process: " + suspicion.getSuspect());
+        }
 
         // suspicionGraph.handleSuspicion(reporter, suspicion);
 

@@ -373,10 +373,13 @@ public class AwareController {
                         " current weight config is the best weight config");
             }
 
-            if (svc.getStaticConf().isUseLeaderSelection()
-                    && executionManager.getCurrentLeader() != best.getLeader()
-                    && (((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal()) ||
-                        !SuspicionMonitor.getInstance(svc).computeCandidateSet().contains(executionManager.getCurrentLeader())) {
+            int leader = executionManager.getCurrentLeader();
+            boolean betterLeaderFound =  svc.getStaticConf().isUseLeaderSelection()
+                    && leader != best.getLeader()
+                    && (((double) current.getPredictedLatency()) > ((double) best.getPredictedLatency()) * svc.getStaticConf().getOptimizationGoal());
+            boolean currentLeaderIsSuspicious =  !SuspicionMonitor.getInstance(svc).computeCandidateSet().contains(leader)  && leader != best.getLeader();
+
+            if ( betterLeaderFound || currentLeaderIsSuspicious) {
 
                 // The current leader is not the best, change it to the best
                 int newLeader = (best.getLeader() + svc.getCurrentViewN()) % svc.getCurrentViewN();
