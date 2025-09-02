@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.math.BigInteger;
 
 public class SuspicionGraph {
 
@@ -297,15 +298,21 @@ public class SuspicionGraph {
 
     public static void main(String[] args) {
 
-        for (int i = 1; i < 8; i++) {
-            unittest(i);
+
+        System.out.println("Starting experiment: Warm up JVM ..");
+        // Warm-up loop
+        for (int i = 0; i < 10; i++) {
+            System.out.println("Starting experiment: Round .. " + i);
+            unittest(10, false);
+        }
+        System.out.println("Ready to benchmark");
+        System.out.println("f    n    time    std");
+        for (int i = 1; i <= 67; i++) {
+            unittest(i, true);
         }
     }
-    public static void unittest(int scale) {
 
-        int f = 10*scale;
-        int n = 3*f+1;
-
+    private static long calcIndependentSetTime(int f, int n) {
         Graph<Integer, DefaultWeightedEdge> sGraph = new DirectedWeightedMultigraph<>(DefaultWeightedEdge.class);
         for (int i = 0; i < n; i++) {
             sGraph.addVertex(i);
@@ -324,6 +331,53 @@ public class SuspicionGraph {
 
             }
         }
+        long start = System.nanoTime();
+        Set<Integer> maxIndependentSet = //greedyIndependentSet(sGraph);
+                maxIndependentSet(sGraph, false);
+        long end = System.nanoTime();
+        return ((end - start));
+    }
+
+    public static void unittest(int scale, boolean verbose) {
+
+        int f = scale;
+        int n = 3*f+1;
+
+
+        int repetitions = 100;
+        long[] times = new long[repetitions];
+
+
+        for (int i=0; i< repetitions; i++){
+            // Cache eviction
+            byte[] trash = new byte[10 * 1024*1024]; // 10MB
+            for (int j = 0; j < trash.length; j++) {
+                trash[j] = (byte) i;
+            }
+            times[i] = calcIndependentSetTime(f, n);
+        }
+        long average = 0;
+        for (long time : times) {
+            average += time;
+        }
+        average = average / repetitions;
+
+        BigInteger sumSquaredDiffs = BigInteger.ZERO;
+        BigInteger averageBI = BigInteger.valueOf(average);
+
+        for (long time : times) {
+            BigInteger timeBI = BigInteger.valueOf(time);
+            BigInteger diff = timeBI.subtract(averageBI);
+            BigInteger squaredDiff = diff.multiply(diff);
+            sumSquaredDiffs = sumSquaredDiffs.add(squaredDiff);
+        }
+
+// Convert to double for standard deviation calculation
+        double std = Math.sqrt(sumSquaredDiffs.doubleValue() / repetitions);
+
+        if (verbose)    System.out.println(f + "    " + n + "    " + average/1000 + "    " + std/1000);
+
+ /*
         System.out.println();
         System.out.println("______________________________________");
         System.out.println("____________Next Test_________________");
@@ -334,16 +388,20 @@ public class SuspicionGraph {
         System.out.println( "Number of edges: " + sGraph.edgeSet().size());
 
         System.out.println( "Start Search for independent set");
-        long start = System.nanoTime();
-        Set<Integer> maxIndependentSet = //greedyIndependentSet(sGraph);
-                maxIndependentSet(sGraph, false);
-        long end = System.nanoTime();
+
+  */
+
 
         // Output the final result
+        /*
         System.out.println( "maximum independent set: " + maxIndependentSet);
 
         System.out.println( "Size of maximum independent set: " + maxIndependentSet.size());
         System.out.println("Test completed in " + ((end - start)/1000000) + " ms");
+
+         */
+
+
       //  System.out.println("______________________________________");
     }
 
@@ -376,4 +434,6 @@ public class SuspicionGraph {
         }
         return suspicionGraph.containsEdge(reporter, suspect);
     }
+
+
 }

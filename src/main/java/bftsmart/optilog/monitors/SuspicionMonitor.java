@@ -53,7 +53,7 @@ public class SuspicionMonitor implements Monitor {
             suspicions.add(suspicion);
         }
         if (suspicion.getSuspect() == controller.getStaticConf().getProcessId()) {
-            logger.info(">>SUSPICION Received: I was suspected by process: " + suspicion.getSuspect());
+            logger.debug(">>SUSPICION Received: I was suspected by process: " + suspicion.getSuspect());
         }
 
         // suspicionGraph.handleSuspicion(reporter, suspicion);

@@ -95,7 +95,7 @@ public class SensorApp {
             return;  // Dont publish suspicion because consensus was slower as it followed a reconfiguration round
         }
         byte[] data  = SuspicionMeasurement.toBytes(suspicion);
-        logger.info("SUSPICION: I suspect " + suspicion.getSuspect() +
+        logger.debug("SUSPICION: I suspect " + suspicion.getSuspect() +
                 " type: " + suspicion.getProtocolMessageType() + ", consensus: " + suspicion.getConsensusID());
         consensusEngine.propose(data, TOMMessageType.MEASUREMENT_SUSPICION);
     }
