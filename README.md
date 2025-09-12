@@ -10,18 +10,15 @@ In the following, we provide a description of how to (1) build, (2) configure, a
 ----------
 
 
-## Step 1: Check for Updates
+## Step 1: Check for Updates (optional)
 
-Check if the version you pulled from an online repo includes all recent changes form the most stable `main` branch from the [GitHub repository](https://github.com/bergerch/aware). It's best to directly clone from the GitHub Repo we will maintain:
+Check if the version you pulled from an online repo includes all recent changes form the most stable `main` branch from the [GitHub repository](https://github.com/bergerch/opti-aware). To check for updates it might be a good idea to  clone from the GitHub Repo we will maintain:
 
-
-```
-git clone git@github.com:bergerch/aware.git
-```
 
 ```
-git checkout opt-aware
+git clone git@github.com:bergerch/opti-aware.git
 ```
+
 
 Now you should have the most recent changes. Next step is to build the software.
 
