@@ -178,3 +178,36 @@ dependencies {
 
     implementation 'org.jgrapht:jgrapht-core:1.5.2'
 }
+
+// --- Linux-only compile of libptp.so into build/install/library/lib ---
+if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+    def ptpDir    = file("src/main/java/bftsmart/optilog/PrecisionClock")
+    def nativeOut = file("$buildDir/install/library/lib")
+    def outSo     = new File(nativeOut, "libptp.so")
+
+    tasks.register('compilePtp', Exec) {
+        workingDir ptpDir
+        doFirst { nativeOut.mkdirs() }
+        executable "gcc"
+        args "-shared",
+                "-o", outSo.absolutePath,
+                "-fPIC",
+                "ptp_time.c",
+                "-I${System.getenv('JAVA_HOME') ?: '/usr/lib/jvm/java-11-openjdk-amd64'}/include",
+                "-I${System.getenv('JAVA_HOME') ?: '/usr/lib/jvm/java-11-openjdk-amd64'}/include/linux",
+                "-lc"
+        inputs.file(new File(ptpDir, "ptp_time.c"))
+        outputs.file(outSo)
+    }
+
+    // hook into lifecycle
+    tasks.named('build') { dependsOn 'compilePtp' }
+    tasks.withType(JavaExec).configureEach {
+        dependsOn 'compilePtp'
+        jvmArgs("-Djava.library.path=${nativeOut.absolutePath}")
+    }
+    tasks.withType(Test).configureEach {
+        dependsOn 'compilePtp'
+        jvmArgs("-Djava.library.path=${nativeOut.absolutePath}")
+    }
+}
