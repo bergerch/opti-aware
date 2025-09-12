@@ -119,7 +119,7 @@ You can run a single instance of a *ThroughputLatencyServer* (a replica used to 
  
 ```
 ```
-./runscripts/smartrun.sh bftsmart.demo.microbenchmarks.ThroughputLatencyServer 0 10000 0 0 false nosig
+./smartrun.sh bftsmart.demo.microbenchmarks.ThroughputLatencyServer 0 10000 0 0 false nosig
 
 ```
 
