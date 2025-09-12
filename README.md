@@ -115,10 +115,14 @@ Furthermore, note that firewall rules must be configured to allow TCP inbound an
 ## Step 7: Running the Replicas
 
 
-You can run a single instance of a *ThrougputLatencyServer* (a replica used to conduct benchmarks) using the following command:
+You can run a single instance of a *ThroughputLatencyServer* (a replica used to conduct benchmarks) using the following commands:
 
 ```
-./runscripts/smartrun.sh bftsmart.demo.microbenchmarks.ThrougputLatencyServer 0 10000 0 0 false nosig
+ cd build/install/library/
+ 
+```
+```
+./runscripts/smartrun.sh bftsmart.demo.microbenchmarks.ThroughputLatencyServer 0 10000 0 0 false nosig
 
 ```
 
@@ -140,7 +144,10 @@ You need to repeat this procedure for all replicas on every VM, and increment th
 Once all replicas are ready, the client can be launched as follows:
 
 ```
-./runscripts/smartrun.sh bftsmart.demo.ThroughputLatencyClient 1001 1 10000 0 0 false false nosig
+ cd build/install/library/
+```
+```
+./smartrun.sh bftsmart.demo.microbenchmarks.ThroughputLatencyClient 1001 1 10000 0 0 false false nosig
 ```
 
 `ThroughputLatencyClient <initial client id> <number of clients> <number of operations> <request size> <interval (ms)> <read only?> <verbose?> <nosig | default | ecdsa>`
