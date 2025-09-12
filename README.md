@@ -116,11 +116,9 @@ You can run a single instance of a *ThroughputLatencyServer* (a replica used to 
 
 ```
  cd build/install/library/
- 
 ```
 ```
 ./smartrun.sh bftsmart.demo.microbenchmarks.ThroughputLatencyServer 0 10000 0 0 false nosig
-
 ```
 
 Note that you passed the following parameters:
