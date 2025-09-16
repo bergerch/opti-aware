@@ -72,10 +72,14 @@ cd .gradle
 wget https\://services.gradle.org/distributions/gradle-7.1-bin.zip
 unzip -d . gradle-7.1-bin.zip
 ```
-### 2.3 GCC
+### 2.3 GCC & UNZIP
 ```
 sudo apt install gcc
 ```
+```
+sudo apt install unzip
+```
+
 
 ## Step 3: Compile the Source Code
 
