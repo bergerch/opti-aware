@@ -220,7 +220,60 @@ Note that these `bftsmart.benchmark` implementations should also automatically s
 cat bftSmartClient{0..20}/bftSmartClient*.java.*.stdout | grep "Average time for 1000 executions (-10%)" | sed 's/Average time for 1000 executions (-10%) = / /g' | sed 's/ \/\/  /, /g' | sed 's/us/ /g' > latencies.csv
 ```
 
-## Step 9 (optional): Reproduce Results from the Paper
+## Step 9 (optional): Extract and Interpret Results
+
+### ThroughputLatencyClient
+The Client-side implementation can be used to measure the end-to-end latency.
+
+#### What it measures
+Client-side (end-to-end) latency per request: time from just before the client calls invoke{Ordered,Unordered} until the reply returns, measured in nanoseconds (System.nanoTime()).
+Optional summary stats (if verbose=true) for the measured phase: average, standard deviation, and maximum latency; each printed in microseconds (ns/1000).
+
+It can run in two modes:
+
+```
+read/write mode (readOnly=false) → invokeOrdered
+```
+#### What it prints to standard output:
+Latency:
+```
+<clientId>\t<epochMillis>\t<latencyNanos>\n
+```
+where each line is the measured latency of a returned request-result cycle measured at the specific point in time at which the result was ready (at epochMillis)
+
+After the benchmark completes it prints a summary to stdout:
+```
+<id> // Average time for <numOps/2> executions (-10%) = <avg_us> us
+<id> // Standard desviation for <numOps/2> executions (-10%) = <sd_us> us
+<id> // Average time for <numOps/2> executions (all samples) = <avg_us> us
+<id> // Standard desviation for <numOps/2> executions (all samples) = <sd_us> us
+<id> // Maximum time for <numOps/2> executions (all samples) = <max_us> us
+```
+The measurement unit is here microseconds.
+
+#### What it writes to disk:
+
+a tab seperated value file (similiar to a .csv but \t instead of comma as seperator), stored in the file system
+```
+latencies_<initialId>.txt
+```
+with the content of
+```
+<clientId>\t<epochMillis>\t<latencyNanos>\n
+```
+where each entry is the measured latency of a returned request-result cycle measured at the specific point in time at which the result was ready (at epochMillis)
+
+#### Interpreting the numbers
+
+Latency unit in the log: nanoseconds. Convert as needed:
+
+microseconds = latencyNanos / 1_000
+
+milliseconds = latencyNanos / 1_000_000
+
+Averages/σ printed in verbose summary are in microseconds already.
+
+## Step 10 (optional): Reproduce Results from the Paper
 
 Evaluation results depend on the speed of communication links in the WAN. 
 Interestingly, we observed that links may become faster (to some extent) over large time intervals (years) because large cloud providers like Amazon AWS improve their infrastructure. For this purpose we provide latency data that allow an interested person to mimic the network characteristics we used by relying on high-fidelity network emulation/simulation tools like [Kollaps](https://github.com/miguelammatos/Kollaps) and [Shadow](https://github.com/shadow/shadow). 
