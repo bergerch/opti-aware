@@ -1,7 +1,13 @@
 Opti-AWARE 0.4 (Last updated 16/09/2025)
 ----------
+This artifact is part of a [EuroSys](https://2026.eurosys.org/) Paper:
 
-This branch contains the source code for Opti-AWARE, an extension of AWARE and WHEAT/BFT-SMaRt.
+```
+OptiLog: Assigning Roles in Byzantine Consensus. Hanish Gogada, Christian Berger, Leander Jehl, Hans P Reiser and Hein Meling. EuroSys 2026.
+```
+
+
+Specifically, this repository contains the source code for Opti-AWARE, an extension of AWARE and WHEAT/BFT-SMaRt that has OptiLog integrated.
 
 *Important:
 For evaluation purpose, we suggest to deploy Opti-AWARE in a wide-area network (WAN).*
@@ -9,7 +15,7 @@ In the following, we provide a description of how to (1) build, (2) configure, a
 
 ----------
 
-## Step 0: System Assumptions
+## Step 0: Environment Description
 
 This tutorial is tested using the following operating system:
 
@@ -19,8 +25,19 @@ Release:	24.04
 Linux Kernel: 6.14.0-1012-aws
 ```
 
+### Resource Use, Hardware Constraints
 The test system specification for testing functionality is a ``t3.micro`` VM on AWS, but for performance evaluations we recommend ``c5.xlarge`` and above.
-Recommended system: More than 20 GB available disk space, 16 GB of RAM and 8 CPU cores.
+
+For *each* replica we recommend the following resources to be available on the VM:
+
+Recommended system for performance measurements: More than 20 GB available disk space, 16 GB of RAM and 8 CPU cores.
+
+Recommended system for testing functionality:  More than 8 GB available disk space, 1 GB of RAM and 1 CPU core.
+
+Expected time for experiments: When conducting benchmarks in a WAN, typically expect 20 min to run a single benchmark, and 60 min when using 3 repetitions.
+
+Note (optional):
+If running inside a network simulator/emulator is envisioned, we advise to scale resource capabilities as needed to support the desired number of replicas on the host system. The time to conduct experiments will vary depending how many CPU cores are provided in total. 
 
 ### Software versions:
 
@@ -59,7 +76,7 @@ git clone https://github.com/bergerch/opti-aware.git
 
 Now you should have the most recent changes. Next step is to build the software.
 
-## Step 2: Install Dependencies
+## Step 2: Install Dependencies / List of Dependencies
 
 We use Java (v. 11) and Gradle (v 7.1), unzip and gcc for this project. If you have them already installed on your computer, then just skip this step otherwise you need to install them. For your convenience you may try the commands below:
 
