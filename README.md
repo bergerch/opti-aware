@@ -39,7 +39,7 @@ Expected time for experiments: When conducting benchmarks in a WAN, we typically
 Expected disk space for experiments: The log files typically are quite small, just a few hundred KBs to a few MBs. If you have configured ~8 GB available disk space you should not run into problems.
 
 Note (optional):
-If running inside a network simulator/emulator is envisioned, we advise to scale resource capabilities as needed to support the desired number of replicas on the host system. The time to conduct experiments will vary depending how many CPU cores are provided in total. 
+If running inside a network simulator/emulator is envisioned, we advise to scale resource capabilities as needed to support the desired number of replicas on the host system. The time to conduct experiments will vary depending how many CPU cores are provided in total. Definetly use more RAM (> 128 GB) and more disk space (> 20 GB available), but in the end it depends on how many replicas you want to run (e.g. we calculate with ~4GB RAM per replica, but 8GB would be more safe).
 
 ### Software versions:
 
