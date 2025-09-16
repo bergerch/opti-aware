@@ -25,7 +25,7 @@ Release:	24.04
 Linux Kernel: 6.14.0-1012-aws
 ```
 
-### Resource Use, Hardware Constraints
+### Resource Use, Hardware Constraints, Expected Resource Use per Experiment
 The test system specification for testing functionality is a ``t3.micro`` VM on AWS, but for performance evaluations we recommend ``c5.xlarge`` and above.
 
 For *each* replica we recommend the following resources to be available on the VM:
@@ -34,7 +34,9 @@ Recommended system for performance measurements: More than 20 GB available disk 
 
 Recommended system for testing functionality:  More than 8 GB available disk space, 1 GB of RAM and 1 CPU core.
 
-Expected time for experiments: When conducting benchmarks in a WAN, typically expect 20 min to run a single benchmark, and 60 min when using 3 repetitions.
+Expected time for experiments: When conducting benchmarks in a WAN, we typically expect 20 min to run a single benchmark, and 60 min when using 3 repetitions.
+
+Expected disk space for experiments: The log files typically are quite small, just a few hundred KBs to a few MBs. If you have configured 10 GB available disk space you should not run into problems.
 
 Note (optional):
 If running inside a network simulator/emulator is envisioned, we advise to scale resource capabilities as needed to support the desired number of replicas on the host system. The time to conduct experiments will vary depending how many CPU cores are provided in total. 
