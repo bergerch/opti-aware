@@ -83,6 +83,7 @@ sudo apt install unzip
 
 ## Step 3: Compile the Source Code
 
+Change directory into this repository and execute the following commands:
 For the first time, you can execute ``./gradlew`` (this should also install gradle) inside the repository.
 ```
 ./gradlew
