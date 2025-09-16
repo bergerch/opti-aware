@@ -88,15 +88,11 @@ For the first time, you can execute ``./gradlew`` (this should also install grad
 ```
 ./gradlew
 ```
-To compile all code, run the ``build`` command (rebuild every time you make changes to ``src``) :
+Then, to compile all code, run the following commands (rebuild every time you make changes to ``src``) :
 ```
-./gradlew build
+./gradlew installDist && ./gradlew build
 ```
-To prepare for launching the artifact use the ``installDist`` command:
-```
-./gradlew installDist
-```
-This prepares the required jar files and default configuration files to be available in the `build/install/library` directory.
+This also prepares the required jar files and default configuration files to be available in the `build/install/library` directory.
 
 
 
