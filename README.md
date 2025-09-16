@@ -39,6 +39,8 @@ JVM:          11.0.28 (Ubuntu 11.0.28+6-post-Ubuntu-1ubuntu124.04.1)
 OS:           Linux 6.14.0-1012-aws amd64
 ------------------------------------------------------------
 GCC: gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+UNZIP: UnZip 6.00
+GIT: git version 2.43.0
 ```
 
 Note that these are the versions we tested with, newer version might also work but without guarantee.
