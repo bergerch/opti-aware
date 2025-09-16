@@ -19,7 +19,7 @@ Release:	24.04
 Linux Kernel: 6.14.0-1012-aws
 ```
 
-The test system specification for testing functionality is a ``t3.micro`` VM on AWS, but for performance evaluations we recommend ``m8g.2xlarge`` and above.
+The test system specification for testing functionality is a ``t3.micro`` VM on AWS, but for performance evaluations we recommend ``c5.xlarge`` and above.
 Recommended system: More than 20 GB available disk space, 16 GB of RAM and 8 CPU cores.
 
 ### Software versions:
