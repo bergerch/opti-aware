@@ -1,4 +1,4 @@
-Opti-AWARE 0.3
+Opti-AWARE 0.4 (Last updated 16/09/2025)
 ----------
 
 This branch contains the source code for Opti-AWARE, an extension of AWARE and WHEAT/BFT-SMaRt.
@@ -9,6 +9,41 @@ In the following, we provide a description of how to (1) build, (2) configure, a
 
 ----------
 
+## Step 0: System Assumptions
+
+This tutorial is tested using the following operating system:
+
+```
+Description:	Ubuntu 24.04.3 LTS
+Release:	24.04
+Linux Kernel: 6.14.0-1012-aws
+```
+
+The test system specification for testing functionality is a ``t3.micro`` VM on AWS, but for performance evaluations we recommend ``m8g.2xlarge`` and above.
+Recommended system: More than 20 GB available disk space, 16 GB of RAM and 8 CPU cores.
+
+### Software versions:
+
+```
+Java v. 11 (tested with openjdk version "11.0.28" 2025-07-15; build 11.0.28+6-post-Ubuntu-1ubuntu124.04.1)
+Gradle v 7.1 (output of -version below)
+------------------------------------------------------------
+Gradle 7.1
+------------------------------------------------------------
+Build time:   2021-06-14 14:47:26 UTC
+Revision:     989ccc9952b140ee6ab88870e8a12f1b2998369e
+Kotlin:       1.4.31
+Groovy:       3.0.7
+Ant:          Apache Ant(TM) version 1.10.9 compiled on September 27 2020
+JVM:          11.0.28 (Ubuntu 11.0.28+6-post-Ubuntu-1ubuntu124.04.1)
+OS:           Linux 6.14.0-1012-aws amd64
+------------------------------------------------------------
+GCC: gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+```
+
+Note that these are the versions we tested with, newer version might also work but without guarantee.
+
+
 
 ## Step 1: Check for Updates (optional)
 
@@ -16,7 +51,7 @@ Check if the version you pulled from an online repo includes all recent changes 
 
 
 ```
-git clone git@github.com:bergerch/opti-aware.git
+git clone https://github.com/bergerch/opti-aware.git
 ```
 
 
@@ -26,30 +61,37 @@ Now you should have the most recent changes. Next step is to build the software.
 
 We use Java (v. 11) and Gradle (v 7.1) for this project. If you have them already installed on your computer, then just skip this step otherwise you need to install them. For your convenience you may try the commands below:
 
+### 2.1 Java
 ```
 sudo apt install openjdk-11-jdk
 ```
-
+### 2.2 Gradle
 ```
 mkdir .gradle
 cd .gradle
 wget https\://services.gradle.org/distributions/gradle-7.1-bin.zip
 unzip -d . gradle-7.1-bin.zip
 ```
-
+### 2.3 GCC
+```
+sudo apt install gcc
+```
 
 ## Step 3: Compile the Source Code
 
-
-
-After installing Gradle just go into the main directory of the repo and type this command:
-
-
+For the first time, you can execute ``./gradlew`` (this should also install gradle) inside the repository.
+```
+./gradlew
+```
+To compile all code, run the ``build`` command (rebuild every time you make changes to ``src``) :
+```
+./gradlew build
+```
+To prepare for launching the artifact use the ``installDist`` command:
 ```
 ./gradlew installDist
 ```
-
-The required jar files and default configuration files will be available in the `build/install/library` directory.
+This prepares the required jar files and default configuration files to be available in the `build/install/library` directory.
 
 
 
